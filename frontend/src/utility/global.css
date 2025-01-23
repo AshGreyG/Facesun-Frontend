@@ -1,0 +1,17 @@
+:root {
+
+  /* color */
+
+  --main-background-color: #f4ede4;
+  --container-background-color: #fff8f2;
+  --link-color: #745b19;
+  --font-color: #000;
+  --button-color: #f5e1bb;
+  --_focus-button-color: #d5c099;
+  --shadow-opacity-color: rgba(0, 0, 0, 0.2);
+
+  /* border-radius */
+
+  --panel-border-radius: 15px;
+  --big-button-height: 60px;
+}
