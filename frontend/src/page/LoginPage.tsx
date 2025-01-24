@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import "./LoginPage.css";
 import i18next from "../i18n/i18n.tsx";
+import AnimatedLabel from "../components/AnimatedLabel.tsx";
 
 function LoginPage() {
   const [username, setUsername] = useState("");
@@ -28,12 +29,12 @@ function LoginPage() {
       <form>
         <div className="form-control">
           <input type="text" required />
-          <label>{i18next.t("loginUsername")}</label>
+          <AnimatedLabel content={i18next.t("loginUsername")}></AnimatedLabel>
         </div>
 
         <div className="form-control">
           <input type="password" required />
-          <label>{i18next.t("loginPassword")}</label>
+          <AnimatedLabel content={i18next.t("loginPassword")}></AnimatedLabel>
         </div>
 
         <button id="login-btn">
