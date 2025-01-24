@@ -1,4 +1,5 @@
-import i18next from "i18next";
+import i18n from "i18next";
+import { initReactI18next } from "react-i18next";
 
 const languageResources = {
   en: {
@@ -11,7 +12,7 @@ const languageResources = {
       "loginPassword": "Password",
       "loginButtonContent": "Login",
       "noAccountInfo": "Don't have an account?",
-      "registerButtonContent": "Register here"
+      "registerButtonContent": "Register here",
     }
   },
   zh: {
@@ -24,12 +25,12 @@ const languageResources = {
       "loginPassword": "密码",
       "loginButtonContent": "登录",
       "noAccountInfo": "还没有账号？",
-      "registerButtonContent": "在这里注册"
+      "registerButtonContent": "在这里注册",
     }
   }
 };
 
-i18next.init({
+i18n.use(initReactI18next).init({
   lng: "en",
   interpolation: {
     escapeValue: false
@@ -37,4 +38,4 @@ i18next.init({
   resources: languageResources
 });
 
-export default i18next;
+export default i18n;

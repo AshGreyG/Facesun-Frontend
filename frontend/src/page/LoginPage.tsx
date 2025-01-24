@@ -1,58 +1,82 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 import "./LoginPage.css";
-import i18next from "../i18n/i18n.tsx";
 import AnimatedLabel from "../components/AnimatedLabel.tsx";
+import SwitchLanguageBar from "../components/SwitchLanguageBar.tsx";
 
 function LoginPage() {
+  const { t } = useTranslation();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   const navigate = useNavigate();
 
-  const handleLogin = () => {
+  const handleUsernameInput = (event) => setUsername(event.target.value);
+  const handlePasswordInput = (event) => setPassword(event.target.value);
+
+  const handleLogin = (event) => {
+
+    // TODO: Need post to backend to check the username and password
+
     if (username === "admin" && password === "test") {
-      navigate("/login");
+      // navigate("/login");
+      alert("Login Success")
     } else {
       alert("Login Failed");
     }
   };
 
-  const handleRegister = () => {
-    navigate("/");
+  const handleRegister = (event) => {
+    // navigate("/");
+    alert("You clicked register.")
   };
 
   return (
-    <div className="container">
-      <h1>{i18next.t("loginPage")}</h1>
-      <form>
-        <div className="form-control">
-          <input type="text" required />
-          <AnimatedLabel content={i18next.t("loginUsername")}></AnimatedLabel>
-        </div>
-
-        <div className="form-control">
-          <input type="password" required />
-          <AnimatedLabel content={i18next.t("loginPassword")}></AnimatedLabel>
-        </div>
-
-        <button id="login-btn">
-          <strong>{i18next.t("loginButtonContent")}</strong>
-        </button>
-
-        <p className="text">
-          {i18next.t("noAccountInfo")}
+    <div className="login-page">
+      <SwitchLanguageBar />
+      <div className="container">
+        <h1>{t("loginPage")}</h1>
+        <form onSubmit={(event) => event.preventDefault()}>
+          <div className="form-control">
+            <input 
+              type="text" 
+              required 
+              onChange={handleUsernameInput}
+            />
+            <AnimatedLabel content={t("loginUsername")}></AnimatedLabel>
+          </div>
+  
+          <div className="form-control">
+            <input 
+              type="password" 
+              required 
+              onChange={handlePasswordInput}
+            />
+            <AnimatedLabel content={t("loginPassword")}></AnimatedLabel>
+          </div>
+  
           <button 
-            onClick={handleRegister}
-            id="register-btn"
+            id="login-btn"
+            onClick={handleLogin}
           >
-            {i18next.t("registerButtonContent")}
+            <strong>{t("loginButtonContent")}</strong>
           </button>
-        </p>
-      </form>
+  
+          <p className="text">
+            {t("noAccountInfo")}
+            <button 
+              onClick={handleRegister}
+              id="register-btn"
+            >
+              {t("registerButtonContent")}
+            </button>
+          </p>
+        </form>
+      </div>
     </div>
   );
-}
-
+}  
+  
 export default LoginPage;

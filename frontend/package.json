@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@mdi/js": "^7.4.47",
+    "@mdi/react": "^1.6.1",
     "@types/react": "^19.0.7",
     "@types/react-dom": "^19.0.3",
     "cra-template": "1.2.0",

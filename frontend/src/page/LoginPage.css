@@ -1,10 +1,11 @@
-@import "../utility/global.css";
+@import url(../utility/global.css);
 
-body {
+.login-page {
   background-color: var(--main-background-color);
   color: var(--font-color);
   display: flex;
   height: 100vh;
+  width: 100vw;
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -13,6 +14,7 @@ body {
 }
 
 .container {
+  margin-top: 30px;
   background-color: var(--container-background-color);
   padding: 20px 40px;
   border-radius: var(--panel-border-radius);
@@ -54,7 +56,7 @@ body {
 }
 
 .container #login-btn:hover {
-  background-color: var(--_focus-button-color);
+  background-color: var(--_hover-button-color);
   box-shadow: 2px 2px 2px var(--shadow-opacity-color);
 }
 
