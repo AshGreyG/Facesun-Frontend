@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import "./SwitchLanguageBar.css"
 
 function SwitchLanguageBar() {
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
   const handleSwitchLanguage = () => {
     if (i18n.language === "en") {
       i18n.changeLanguage("zh");

@@ -1,15 +1,17 @@
 {
+  "proxy": "http://127.0.0.1:5000",
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
     "@mdi/js": "^7.4.47",
     "@mdi/react": "^1.6.1",
+    "@types/axios": "^0.9.36",
     "@types/react": "^19.0.7",
     "@types/react-dom": "^19.0.3",
+    "axios": "^1.7.9",
     "cra-template": "1.2.0",
     "i18next": "^24.2.1",
-    "less": "^4.2.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-i18next": "^15.4.0",

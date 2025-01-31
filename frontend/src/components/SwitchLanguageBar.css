@@ -9,13 +9,14 @@
   height: var(--switch-language-bar-height);
   box-sizing: border-box;
   justify-content: center;
-  align-items: right;
   display: block;
+  z-index: 1000;
 }
 
 .switch-button {
   right: 0;
   position: relative;
+  float: right;
   height: 40px;
   width: 40px;
   background-color: transparent;
