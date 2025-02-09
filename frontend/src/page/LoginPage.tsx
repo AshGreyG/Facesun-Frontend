@@ -6,9 +6,24 @@ import axios from "axios";
 import "./LoginPage.css";
 import AnimatedLabel from "../components/AnimatedLabel.tsx";
 import SwitchLanguageBar from "../components/SwitchLanguageBar.tsx";
-import backendURL from "../utility/backendURL.tsx";
+import { 
+  backendURL,
+  getCurrentTime,
+  LoginToken
+} from "../utility/utility.tsx";
 
-function LoginPage() {
+interface LoginTokenProps {
+  token: LoginToken;
+  onChangeToken: React.Dispatch<React.SetStateAction<LoginToken>>;
+};
+
+/**
+ * 
+ */
+function LoginPage({
+  token,
+  onChangeToken
+}: LoginTokenProps) {
   const loginAPI = axios.create({
     baseURL: backendURL,
     timeout: 5000,
@@ -16,7 +31,7 @@ function LoginPage() {
       "Content-Type": "application/json"
     }
   });
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
@@ -26,22 +41,28 @@ function LoginPage() {
   const handlePasswordInput = (event) => setPassword(event.target.value);
 
   const handleLogin = (event) => {
-
-    // TODO: Need post to backend to check the username and password
-
     loginAPI
       .post("/manager/login", {
         "username": username,
         "password": password
       })
       .then(response => {
-        console.log(response.data);
+        onChangeToken({
+          JWTAccessToken: response.data.access_token,
+          JWTRefreshToken: response.data.refresh_token
+        });
+        console.log(
+          "[" + getCurrentTime() + "]: User logins successfully.",
+          "Its access token is ",
+          token.JWTAccessToken,
+          ". Its refresh token is ",
+          token.JWTRefreshToken
+        );
+        navigate("/working");
       })
       .catch(error => {
         alert(error);
       })
-
-
   };
 
   const handleRegister = (event) => {
