@@ -11,10 +11,10 @@ export interface LoginToken {
 export function getCurrentTime(): string {
   const now = new Date();
   return `${now.getFullYear()}`
-    + `-${String(now.getMonth() + 1).padStart(2, "0")}`
-    + `-${String(now.getDay() + 1).padStart(2, "0")}`
-    + `-${String(now.getHours() + 1).padStart(2, "0")}`
-    + `:${String(now.getSeconds() + 1).padStart(2, "0")}`
+    + `-${String(now.getMonth()        + 1).padStart(2, "0")}`
+    + `-${String(now.getDay()          + 1).padStart(2, "0")}`
+    + `-${String(now.getHours()        + 1).padStart(2, "0")}`
+    + `:${String(now.getSeconds()      + 1).padStart(2, "0")}`
     + `:${String(now.getMilliseconds() + 1).padStart(4, "0")}`;
 }
 
@@ -38,7 +38,7 @@ export function useRefreshToken(token: LoginToken) {
       .post("/manager/refresh")
       .then(response => {
         localStorage.setItem("userLoginToken", JSON.stringify({
-          JWTAccessToken: response.data.access_token,
+          JWTAccessToken: response.data.access_token as string,
           JWTRefreshToken: token.JWTRefreshToken
         }));
       })

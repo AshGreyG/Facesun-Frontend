@@ -9,6 +9,11 @@ import { LoginToken } from "./utility/utility.tsx";
 import LoginPage from "./page/LoginPage.tsx";
 import WorkingPage from "./page/WorkingPage.tsx";
 
+// State:
+// userLoginToken changes over time, and it's from backend, so it's
+// a state. Every route needs userLoginToken, so it should be handled
+// by App.
+
 function App() {
   const [userLoginToken, setUserLoginToken] = useState<LoginToken>(() => {
     const storedToken = localStorage.getItem("userLoginToken");

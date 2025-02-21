@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 import axios from "axios";
 
 import "./LoginPage.css";
-import AnimatedLabel from "../components/AnimatedLabel.tsx";
 import SwitchLanguageBar from "../components/SwitchLanguageBar.tsx";
 import { 
   backendURL,
@@ -12,18 +11,37 @@ import {
   LoginToken
 } from "../utility/utility.tsx";
 
-interface LoginTokenProps {
+interface AnimatedLabelPropType {
+  content: string
+};
+
+function AnimatedLabel({content}: AnimatedLabelPropType) {
+  const characters: string[] = content.split("");
+
+  return (
+    <label>
+      {characters.map((letter, idx) => (
+        <span
+          key={idx}
+          className="animated-letter"
+          style={{ transitionDelay: `${idx * 50}ms` }}
+        >
+          {letter}
+        </span>
+      ))}
+    </label>
+  )
+}
+
+interface LoginPagePropType {
   token: LoginToken;
   onChangeToken: React.Dispatch<React.SetStateAction<LoginToken>>;
 };
 
 /**
- * 
+ * @param prop The property of component `LoginPage`
  */
-function LoginPage({
-  token,
-  onChangeToken
-}: LoginTokenProps) {
+function LoginPage({token, onChangeToken}: LoginPagePropType) {
   const loginAPI = axios.create({
     baseURL: backendURL,
     timeout: 5000,
@@ -37,10 +55,12 @@ function LoginPage({
 
   const navigate = useNavigate();
 
-  const handleUsernameInput = (event) => setUsername(event.target.value);
-  const handlePasswordInput = (event) => setPassword(event.target.value);
+  const handleUsernameInput 
+    = (event: React.ChangeEvent<HTMLInputElement>) => setUsername(event.target.value);
+  const handlePasswordInput 
+    = (event: React.ChangeEvent<HTMLInputElement>) => setPassword(event.target.value);
 
-  const handleLogin = (event) => {
+  const handleLogin = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     loginAPI
       .post("/manager/login", {
         "username": username,
@@ -48,8 +68,8 @@ function LoginPage({
       })
       .then(response => {
         onChangeToken({
-          JWTAccessToken: response.data.access_token,
-          JWTRefreshToken: response.data.refresh_token
+          JWTAccessToken: response.data.access_token as string,
+          JWTRefreshToken: response.data.refresh_token as string
         });
         console.log(
           "[" + getCurrentTime() + "]: User logins successfully.",
@@ -65,7 +85,7 @@ function LoginPage({
       })
   };
 
-  const handleRegister = (event) => {
+  const handleRegister = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     // navigate("/");
     alert("You clicked register.")
   };

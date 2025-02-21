@@ -10,7 +10,7 @@ import {
   useRefreshToken
 } from "../utility/utility.tsx";
 
-interface WorkingTokenProps {
+interface WorkingPagePropType {
   token: LoginToken; 
   onChangeToken: React.Dispatch<React.SetStateAction<LoginToken>>;
 };
@@ -35,7 +35,7 @@ interface CaseInfo {
 function WorkingPage({
   token,
   onChangeToken
-}: WorkingTokenProps) {
+}: WorkingPagePropType) {
   const workingAPI = axios.create({
     baseURL: backendURL,
     timeout: 5000,

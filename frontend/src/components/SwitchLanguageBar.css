@@ -1,8 +1,9 @@
 @import url(../utility/global.css);
 
 .switch-language-bar {
-  padding: var(--switch-language-bar-padding-top-bottom) 
-           var(--switch-language-bar-padding-left-right);
+  padding: 
+    var(--switch-language-bar-padding-top-bottom) 
+    var(--switch-language-bar-padding-left-right);
   position: fixed;
   top: 0;
   width: var(--switch-language-bar-width);
