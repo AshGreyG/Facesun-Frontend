@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useEffect } from "react";
 
-export const backendURL = "";
+export const backendURL = "http://127.0.0.1:5000";
 
 export interface LoginToken {
   JWTAccessToken: string;
@@ -16,37 +16,4 @@ export function getCurrentTime(): string {
     + `-${String(now.getHours()        + 1).padStart(2, "0")}`
     + `:${String(now.getSeconds()      + 1).padStart(2, "0")}`
     + `:${String(now.getMilliseconds() + 1).padStart(4, "0")}`;
-}
-
-/**
- * @param token:
- */
-export function useRefreshToken(token: LoginToken) {
-  const refreshAPI = axios.create({
-    baseURL: backendURL,
-    timeout: 5000,
-    headers: {
-      "Authorization": "Bearer " + token.JWTRefreshToken,
-      "Content-Type": "application/json"
-    }
-  });
-
-  console.log("[" + getCurrentTime() + "]: Start refreshing token.");
-
-  useEffect(() => {
-    refreshAPI
-      .post("/manager/refresh")
-      .then(response => {
-        localStorage.setItem("userLoginToken", JSON.stringify({
-          JWTAccessToken: response.data.access_token as string,
-          JWTRefreshToken: token.JWTRefreshToken
-        }));
-      })
-      .catch(error => {
-        console.log(
-          "[" + getCurrentTime() + "]: Failed to refresh, error status is ",
-          error.response.status
-        );
-      });
-  }, [refreshAPI, token.JWTRefreshToken]);
 }

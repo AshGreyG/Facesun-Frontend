@@ -7,7 +7,7 @@ import {
   backendURL,
   getCurrentTime,
   LoginToken,
-  useRefreshToken
+  // useRefreshToken
 } from "../utility/utility.tsx";
 
 interface WorkingPagePropType {
@@ -80,7 +80,7 @@ function WorkingPage({
       })
       .catch(error => {
         if (error.response.status === 401) {
-          useRefreshToken();
+          // useRefreshToken();
         }
       })
   };

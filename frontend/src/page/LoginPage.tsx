@@ -15,7 +15,7 @@ interface AnimatedLabelPropType {
   content: string
 };
 
-function AnimatedLabel({content}: AnimatedLabelPropType) {
+function AnimatedLabel({ content }: AnimatedLabelPropType) {
   const characters: string[] = content.split("");
 
   return (
@@ -39,9 +39,22 @@ interface LoginPagePropType {
 };
 
 /**
+ * @type `"Success"` means that the user logins successfully and he will
+ * automatically jump to the `/working` route after showing a success info 3s.
+ * @type `"Fail"` means that the user fails to login, and browser will
+ * show a failed info.
+ * @type 
+ */
+type LoginStatus =
+  | "Success"
+  | "Fail"
+  | "Unknown Error"
+  | "Pending";
+
+/**
  * @param prop The property of component `LoginPage`
  */
-function LoginPage({token, onChangeToken}: LoginPagePropType) {
+function LoginPage({ token, onChangeToken }: LoginPagePropType) {
   const loginAPI = axios.create({
     baseURL: backendURL,
     timeout: 5000,
@@ -50,8 +63,9 @@ function LoginPage({token, onChangeToken}: LoginPagePropType) {
     }
   });
   const {t} = useTranslation();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [loginStatus, setLoginStatus] = useState<LoginStatus>("Pending");
 
   const navigate = useNavigate();
 
@@ -78,10 +92,15 @@ function LoginPage({token, onChangeToken}: LoginPagePropType) {
           ". Its refresh token is ",
           token.JWTRefreshToken
         );
-        navigate("/working");
+        setLoginStatus("Success");
+        setTimeout(() => navigate("/working"), 3000);
       })
       .catch(error => {
-        alert(error);
+        if (error.response.status === 400) {
+          setLoginStatus("Fail");
+        } else {
+          setLoginStatus("Unknown Error");
+        }
       })
   };
 

@@ -16,12 +16,15 @@ import WorkingPage from "./page/WorkingPage.tsx";
 
 function App() {
   const [userLoginToken, setUserLoginToken] = useState<LoginToken>(() => {
-    const storedToken = localStorage.getItem("userLoginToken");
-    return storedToken ? JSON.parse(storedToken) : {
+    const storedToken: string | null = localStorage.getItem("userLoginToken");
+    return storedToken ? JSON.parse(storedToken) as LoginToken : {
       JWTAccessToken: "",
       JWTRefreshToken: ""
-    }
+    } as LoginToken;
   });
+
+  // This is to get the token from local storage, if there is no
+  // 'userLoginToken' in local storage, then initialize the token
 
   useEffect(() => {
     localStorage.setItem("userLoginToken", JSON.stringify(userLoginToken));
