@@ -13,23 +13,23 @@
   margin: 0;
 }
 
-.container {
+.login-container {
   margin-top: 30px;
   background-color: var(--container-background-color);
   padding: 20px 40px;
   border-radius: var(--panel-border-radius);
 }
 
-.container h1 {
+.login-container h1 {
   text-align: center;
   margin-bottom: 30px;
 }
 
-.container p {
+.login-container p {
   font-size: medium;
 }
 
-.container #register-btn {
+.login-container #register-btn {
   background-color: transparent;
   border: 0;
   color: var(--link-color);
@@ -37,11 +37,11 @@
   font-size: medium;
 }
 
-.container #register-btn:hover {
+.login-container #register-btn:hover {
   cursor: pointer;
 }
 
-.container #login-btn {
+.login-container #login-btn {
   cursor: pointer;
   display: inline-block;
   width: 100%;
@@ -56,22 +56,22 @@
     box-shadow 0.3s ease-out;
 }
 
-.container #login-btn:hover {
+.login-container #login-btn:hover {
   background-color: var(--_hover-button-color);
   box-shadow: 2px 2px 2px var(--shadow-opacity-color);
 }
 
-.container .text {
+.login-container .text {
   margin-top: 30px;
 }
 
-.form-control {
+.login-container .form-control {
   position: relative;
   margin: 20px 0 40px;
   width: 300px;
 }
 
-.form-control input {
+.login-container .form-control input {
   background-color: transparent;
   border: none;
   border-bottom: 1.5px solid var(--font-color);
@@ -83,13 +83,13 @@
   z-index: 100;
 }
 
-.form-control input:focus,
-.form-control input:active {
+.login-container .form-control input:focus,
+.login-container .form-control input:active {
   outline: none;
   border-bottom-color: var(--font-color);
 }
 
-.form-control label {
+.login-container .form-control label {
   position: absolute;
   left: 0;
   top: 15px;
@@ -98,15 +98,15 @@
   color: var(--link-color);
 }
 
-.form-control label span {
+.login-container .form-control label span {
   display: inline-block;
   font-size: 18px;
   min-width: 5px;
   transition: 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
-.form-control input:focus + label span,
-.form-control input:valid + label span {
+.login-container .form-control input:focus + label span,
+.login-container .form-control input:valid + label span {
   color: var(--link-color);
   transform: translateY(-30px);
 }

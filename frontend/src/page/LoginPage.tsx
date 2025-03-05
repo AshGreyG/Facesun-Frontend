@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 
 import "./LoginPage.css";
 import SwitchLanguageBar from "../components/SwitchLanguageBar.tsx";
@@ -10,6 +10,11 @@ import {
   getCurrentTime,
   LoginToken
 } from "../utility/utility.tsx";
+
+import { 
+  LoginTokenResponseData,
+  ErrorResponse
+} from "../utility/interface.tsx";
 
 interface AnimatedLabelPropType {
   content: string
@@ -33,6 +38,10 @@ function AnimatedLabel({ content }: AnimatedLabelPropType) {
   )
 }
 
+/**
+ * @description This is the interface of component function {@link LoginPage}
+ * @param {LoginToken} token
+ */
 interface LoginPagePropType {
   token: LoginToken;
   onChangeToken: React.Dispatch<React.SetStateAction<LoginToken>>;
@@ -43,7 +52,9 @@ interface LoginPagePropType {
  * automatically jump to the `/working` route after showing a success info 3s.
  * @type `"Fail"` means that the user fails to login, and browser will
  * show a failed info.
- * @type 
+ * @type `"Unknown Error"` means that browser can't connect to the server, but
+ * server returns some unknown errors.
+ * @type `"Pending"` is the original login status.
  */
 type LoginStatus =
   | "Success"
@@ -52,7 +63,10 @@ type LoginStatus =
   | "Pending";
 
 /**
- * @param prop The property of component `LoginPage`
+ * @param {LoginToken} token - The login token of user, passed by App entry
+ * component. The token is stored in local storage.
+ * @param {React.Dispatch<React.SetStateAction<LoginToken>>} onChangeToken
+ * - The set function of parameter `token`, passed by App entry component.
  */
 function LoginPage({ token, onChangeToken }: LoginPagePropType) {
   const loginAPI = axios.create({
@@ -69,42 +83,39 @@ function LoginPage({ token, onChangeToken }: LoginPagePropType) {
 
   const navigate = useNavigate();
 
-  const handleUsernameInput 
-    = (event: React.ChangeEvent<HTMLInputElement>) => setUsername(event.target.value);
-  const handlePasswordInput 
-    = (event: React.ChangeEvent<HTMLInputElement>) => setPassword(event.target.value);
-
-  const handleLogin = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  function handleLogin() {
     loginAPI
       .post("/manager/login", {
         "username": username,
         "password": password
       })
-      .then(response => {
+      .then((response: AxiosResponse<LoginTokenResponseData, any>) => {
         onChangeToken({
-          JWTAccessToken: response.data.access_token as string,
-          JWTRefreshToken: response.data.refresh_token as string
+          JWTAccessToken: response.data.access_token,
+          JWTRefreshToken: response.data.refresh_token
         });
+
         console.log(
           "[" + getCurrentTime() + "]: User logins successfully.",
           "Its access token is ",
           token.JWTAccessToken,
           ". Its refresh token is ",
           token.JWTRefreshToken
-        );
+        );  // This needs to be removed when in real environment.
+
         setLoginStatus("Success");
         setTimeout(() => navigate("/working"), 3000);
       })
-      .catch(error => {
+      .catch((error: ErrorResponse) => {
         if (error.response.status === 400) {
           setLoginStatus("Fail");
         } else {
           setLoginStatus("Unknown Error");
         }
-      })
+      });
   };
 
-  const handleRegister = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  function handleRegister() {
     // navigate("/");
     alert("You clicked register.")
   };
@@ -112,14 +123,14 @@ function LoginPage({ token, onChangeToken }: LoginPagePropType) {
   return (
     <div className="login-page">
       <SwitchLanguageBar />
-      <div className="container">
+      <div className="login-container">
         <h1>{t("loginPage")}</h1>
         <form onSubmit={(event) => event.preventDefault()}>
           <div className="form-control">
             <input 
               type="text" 
               required 
-              onChange={handleUsernameInput}
+              onChange={(e) => setUsername(e.target.value)}
             />
             <AnimatedLabel content={t("loginUsername")}></AnimatedLabel>
           </div>
@@ -128,7 +139,7 @@ function LoginPage({ token, onChangeToken }: LoginPagePropType) {
             <input 
               type="password" 
               required 
-              onChange={handlePasswordInput}
+              onChange={(e) => setPassword(e.target.value)}
             />
             <AnimatedLabel content={t("loginPassword")}></AnimatedLabel>
           </div>
@@ -153,6 +164,6 @@ function LoginPage({ token, onChangeToken }: LoginPagePropType) {
       </div>
     </div>
   );
-}  
-  
+}
+
 export default LoginPage;

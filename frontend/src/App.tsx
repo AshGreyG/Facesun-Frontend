@@ -1,4 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { 
+  useEffect, 
+  useState 
+} from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -12,23 +15,28 @@ import WorkingPage from "./page/WorkingPage.tsx";
 // State:
 // userLoginToken changes over time, and it's from backend, so it's
 // a state. Every route needs userLoginToken, so it should be handled
-// by App.
+// by App. Because we need jump among different route pages, and the
+// state / context will be reloaded, so we need use localStorage or
+// cookie to store the token.
 
 function App() {
-  const [userLoginToken, setUserLoginToken] = useState<LoginToken>(() => {
-    const storedToken: string | null = localStorage.getItem("userLoginToken");
-    return storedToken ? JSON.parse(storedToken) as LoginToken : {
-      JWTAccessToken: "",
-      JWTRefreshToken: ""
-    } as LoginToken;
-  });
+  const [userLoginToken, setUserLoginToken] 
+    = useState<LoginToken>((): LoginToken => {
+      const storedToken: string | null = localStorage.getItem("userLoginToken");
+      return storedToken
+        ? JSON.parse(storedToken) as LoginToken
+        : {
+          JWTAccessToken: "",
+          JWTRefreshToken: ""
+        };
+    });
 
   // This is to get the token from local storage, if there is no
   // 'userLoginToken' in local storage, then initialize the token
 
   useEffect(() => {
     localStorage.setItem("userLoginToken", JSON.stringify(userLoginToken));
-  }, [userLoginToken])
+  }, [userLoginToken]);
 
   return (
     <Router>

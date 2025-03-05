@@ -1,35 +1,90 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { 
+  useEffect, 
+  useState,
+  useReducer
+} from "react";
+import axios, { AxiosResponse } from "axios";
 import { useTranslation } from "react-i18next";
 
+import "./WorkingPage.css";
 import SwitchLanguageBar from "../components/SwitchLanguageBar.tsx";
 import { 
   backendURL,
   getCurrentTime,
   LoginToken,
-  // useRefreshToken
 } from "../utility/utility.tsx";
+
+import {
+  RawCaseInfo,
+  CaseInfo,
+  RefreshTokenResponseData,
+  GetCasesResponseData,
+  ErrorResponse
+} from "../utility/interface.tsx";
+
+interface CaseRowPropType {
+  caseRow: CaseInfo;
+}
+
+function CaseRow({ caseRow }: CaseRowPropType) {
+  return (
+    <tr key={caseRow.caseID}>
+      <th scope="col" key={1}>{caseRow.caseID}</th>
+      <th scope="col" key={2}>{caseRow.caseName}</th>
+      <th scope="col" key={3}>{caseRow.clueCount}</th>
+      <th scope="col" key={4}>{caseRow.addUserID}</th>
+    </tr>
+  );
+}
+
+interface CasesTableContainerPropType {
+  casesData: CaseInfo[];
+}
+
+function CasesTableContainer({
+  casesData,
+}: CasesTableContainerPropType) {
+  const {t} = useTranslation();
+
+  return (
+    <div className="cases-table-container">
+      <table className="cases-table">
+        <thead>
+          <tr key={0}>
+            <th scope="col" key={1}>{t("caseID")}</th>
+            <th scope="col" key={2}>{t("caseName")}</th>
+            <th scope="col" key={3}>{t("clueCount")}</th>
+            <th scope="col" key={4}>{t("addUserID")}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {casesData.map((caseRow) => {
+            return <CaseRow caseRow={caseRow} key={caseRow.caseID}/>
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+interface CluesTableContainerPropType {
+  casesData: CaseInfo[];
+}
+
+function CluesTableContainer({
+  casesData
+}: CluesTableContainerPropType) {
+
+  return (
+    <div className="clues-table-container">
+
+    </div>
+  )
+}
 
 interface WorkingPagePropType {
   token: LoginToken; 
   onChangeToken: React.Dispatch<React.SetStateAction<LoginToken>>;
-};
-
-interface RawCaseInfo {
-  add_user_id: number;
-  case_id: number;
-  case_name: string;
-  clue_count: number;
-};
-
-// The naming rule is not matching frontend naming rules.
-// So I will process it.
-
-interface CaseInfo {
-  addUserID: number;
-  caseID: number;
-  caseName: string;
-  clueCount: number;
 };
 
 function WorkingPage({
@@ -44,55 +99,71 @@ function WorkingPage({
       "Content-Type": "application/json"
     }
   });
-  const {t} = useTranslation();
-  const [casesData, setCasesData] = useState<CaseInfo[]>(() => {
-    const storedCasesData = localStorage.getItem("casesData");
-    return storedCasesData 
-      ? JSON.parse(storedCasesData) as CaseInfo[] 
-      : [] as CaseInfo[];
+
+  const refreshTokenAPI = axios.create({
+    baseURL: backendURL,
+    timeout: 5000,
+    headers: {
+      "Authorization": "Bearer " + token.JWTRefreshToken,
+      "Content-Type": "application/json"
+    }
   });
 
-  useEffect(() => {
-    localStorage.setItem("casesData", JSON.stringify(casesData));
-  }, [casesData]);
+  const {t} = useTranslation();
+  const [casesData, setCasesData] = useState<CaseInfo[]>([]);
+  const [isInCases, setIsInCases] = useState<boolean>(true);
 
-  const handleGetCases = () => {
-    console.log("[" + getCurrentTime() + "]: Getting cases, please wait...");
+  useEffect(() => {
     workingAPI
       .get("/cases/case")
-      .then(response => {
-        const rawCasesArray: RawCaseInfo[] = response.data.data;
-
-        // The first 'data' is the property of 'response'
-        // The second 'data' is the backend-defined property.
-
-        setCasesData(rawCasesArray.map(rawCase => {
+      .then((response: AxiosResponse<GetCasesResponseData, any>) => {
+        const cases: CaseInfo[] = response.data.data.map((rawCase): CaseInfo => {
           return {
             addUserID:  rawCase.add_user_id,
             caseID:     rawCase.case_id,
             caseName:   rawCase.case_name,
             clueCount:  rawCase.clue_count
-          }
-        }));
-
-        // Here I use 'map' function to map the RawCaseInfo[] to CaseInfo[]
-        console.log("[" + getCurrentTime() + "]: Finish getting cases.");
+          };
+        });
+        setCasesData(cases);
       })
-      .catch(error => {
+      .catch((error: ErrorResponse) => {
         if (error.response.status === 401) {
-          // useRefreshToken();
+
+          // If the serve response 401 status, then user need to refresh his
+          // token, and re-store this token to the local storage.
+
+          refreshTokenAPI
+            .post("/manager/refresh")
+            .then((response: AxiosResponse<RefreshTokenResponseData, any>) => {
+              onChangeToken({
+                JWTAccessToken: response.data.access_token,
+                JWTRefreshToken: token.JWTRefreshToken
+              });
+            })
+            .catch((error: ErrorResponse) => {
+              alert("❌ Can't update");
+            })
+        } else {
+          alert("Unknown Error");
         }
       })
-  };
+  }, []);
+
+  // 
 
   return (
     <div className="working-page">
       <SwitchLanguageBar />
-      <div className="container">
-
+      <div className="cases-container">
+        {isInCases ? (
+          <CasesTableContainer casesData={casesData} />
+        ) : (
+          <CluesTableContainer casesData={casesData} />
+        )}
       </div>
     </div>
-  )
+  );
 }
 
 export default WorkingPage;

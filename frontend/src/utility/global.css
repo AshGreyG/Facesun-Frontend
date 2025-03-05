@@ -3,6 +3,7 @@
   /* color */
 
   --main-background-color: #f4ede4;
+  --table-head-background-color: #f4ede4;
   --container-background-color: #fff8f2;
   --link-color: #745b19;
   --font-color: #000;
@@ -10,6 +11,7 @@
   --_hover-button-color: #d5c099;
   --_hover-icon-color: rgba(0, 0, 0, 0.1);
   --shadow-opacity-color: rgba(0, 0, 0, 0.2);
+  --table-border-color: #d0c5b4;
 
   /* border-radius */
 
