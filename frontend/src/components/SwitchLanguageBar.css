@@ -4,14 +4,14 @@
   padding: 
     var(--switch-language-bar-padding-top-bottom) 
     var(--switch-language-bar-padding-left-right);
-  position: fixed;
+  position: absolute;
   top: 0;
   width: var(--switch-language-bar-width);
   height: var(--switch-language-bar-height);
   box-sizing: border-box;
   justify-content: center;
   display: block;
-  z-index: 1000;
+  z-index: 10;
 }
 
 .switch-button {

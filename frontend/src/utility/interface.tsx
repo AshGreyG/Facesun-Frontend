@@ -1,6 +1,6 @@
 export interface RawCaseInfo {
-  add_user_id: number;
-  case_id: number;
+  add_user_id: string;
+  case_id: string;
   case_name: string;
   clue_count: number;
 };
@@ -9,8 +9,8 @@ export interface RawCaseInfo {
 // So I will process it using Array method 'map'
 
 export interface CaseInfo {
-  addUserID: number;
-  caseID: number;
+  addUserID: string;
+  caseID: string;
   caseName: string;
   clueCount: number;
 };
@@ -26,6 +26,10 @@ export interface RefreshTokenResponseData {
 
 export interface GetCasesResponseData {
   data: RawCaseInfo[];
+  message: string;
+}
+
+export interface AddCaseResponseData {
   message: string;
 }
 

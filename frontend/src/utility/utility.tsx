@@ -1,7 +1,6 @@
-import axios from "axios";
-import { useEffect } from "react";
+export const backendURL: string = "http://127.0.0.1:5000";
 
-export const backendURL = "http://127.0.0.1:5000";
+export const PAGINATION_RECORDS_NUM: number = 10;
 
 export interface LoginToken {
   JWTAccessToken: string;

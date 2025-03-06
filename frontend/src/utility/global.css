@@ -13,15 +13,13 @@
   --shadow-opacity-color: rgba(0, 0, 0, 0.2);
   --table-border-color: #d0c5b4;
 
-  /* border-radius */
+  /* size */
 
   --panel-border-radius: 15px;
   --big-button-height: 60px;
-
-  /* size */
-
   --switch-language-bar-padding-top-bottom: 12px;
   --switch-language-bar-padding-left-right: 16px;
   --switch-language-bar-height: 60px;
   --switch-language-bar-width: 100%;
+  --modal-padding: 20px;
 }

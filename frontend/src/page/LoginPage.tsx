@@ -132,7 +132,7 @@ function LoginPage({ token, onChangeToken }: LoginPagePropType) {
               required 
               onChange={(e) => setUsername(e.target.value)}
             />
-            <AnimatedLabel content={t("loginUsername")}></AnimatedLabel>
+            <AnimatedLabel content={t("loginUsername")} />
           </div>
   
           <div className="form-control">
@@ -141,7 +141,7 @@ function LoginPage({ token, onChangeToken }: LoginPagePropType) {
               required 
               onChange={(e) => setPassword(e.target.value)}
             />
-            <AnimatedLabel content={t("loginPassword")}></AnimatedLabel>
+            <AnimatedLabel content={t("loginPassword")} />
           </div>
   
           <button 

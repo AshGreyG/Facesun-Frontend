@@ -1,0 +1,57 @@
+@import url(../utility/global.css);
+
+.abstract-modal-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0);
+  transition: background-color 0.15s cubic-bezier(0.3, 0, 0, 1);
+  display: flex;
+  z-index: 1000;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.abstract-modal-background.active {
+  background-color: rgba(0, 0, 0, 0.5);
+  transition: background-color 0.5s cubic-bezier(0.05, 0.7, 0.1, 1);
+}
+
+.abstract-modal-background .modal-container {
+  position: absolute;
+  background-color: var(--main-background-color);
+  padding: var(--modal-padding);
+  border-radius: var(--panel-border-radius);
+  min-width: 280px;
+  max-width: min(560px, calc(100% - 48px));
+  height: 10%;
+  top: 50%;
+  transform: translateY(calc(-50% - 87px));
+  transition: 
+    height 0.15s linear,
+    transform 0.15s linear;
+}
+
+.abstract-modal-background.active .modal-container {
+  height: 40%;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: 
+    height 0.5s linear,
+    transform 0.5s linear;
+}
+
+.abstract-modal-background .modal-container .headline,
+.abstract-modal-background .modal-container .children-component {
+  opacity: 0;
+  transition: opacity 0.15s linear;
+}
+
+.abstract-modal-background.active .modal-container .headline,
+.abstract-modal-background.active .modal-container .children-component {
+  opacity: 1;
+  transition: opacity 0.5s linear;
+}
