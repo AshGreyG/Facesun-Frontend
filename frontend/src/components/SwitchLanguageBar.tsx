@@ -7,12 +7,10 @@ import "./SwitchLanguageBar.css"
 
 interface SwitchLanguageBarPropType {
   message?: string;
-  children?: React.ReactNode;
 }
 
 function SwitchLanguageBar({ 
   message,
-  children
 }: SwitchLanguageBarPropType) {
   const { i18n } = useTranslation();
 
@@ -26,8 +24,8 @@ function SwitchLanguageBar({
 
   return (
     <div className="switch-language-bar">
-      <div className="children-component">
-        {children}
+      <div className="message-component">
+        {message}
       </div>
       <div className="switch-button-container">
         <button
@@ -41,7 +39,7 @@ function SwitchLanguageBar({
         </button>
       </div>
     </div>
-  )
+  );
 }
 
 export default SwitchLanguageBar;

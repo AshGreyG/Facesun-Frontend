@@ -36,3 +36,18 @@
 .switch-button:hover {
   background-color: var(--_hover-icon-color);
 }
+
+.message-component {
+  position: relative;
+  left: 0;
+  height: 40px;
+  background-color: transparent;
+  float: left;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--link-color);
+  padding-left: calc(10vw - 40px);
+}

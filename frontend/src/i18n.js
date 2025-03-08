@@ -16,10 +16,12 @@ const languageResources = {
 
       // Working Page Translation
 
+      "workingPageName": "Edit Cases & Clues",
       "caseID": "Case ID",
       "caseName": "Case Name",
       "clueCount": "Clue Count",
-      "addUserID": "Add User ID"
+      "addUserID": "Add User ID",
+      "addingCaseModalTitle": "Add Case"
     }
   },
   zh: {
@@ -27,6 +29,7 @@ const languageResources = {
 
       // Login Page Translation
 
+      "workingPageName": "案件线索编辑",
       "loginPage": "登录",
       "loginUsername": "用户名",
       "loginPassword": "密码",
@@ -39,7 +42,8 @@ const languageResources = {
       "caseID": "案件编号",
       "caseName": "案件名称",
       "clueCount": "线索数量",
-      "addUserID": "案件添加人"
+      "addUserID": "案件添加人",
+      "addingCaseModalTitle": "增加案件"
     }
   }
 };

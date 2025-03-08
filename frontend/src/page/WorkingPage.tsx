@@ -11,14 +11,14 @@ import { mdiPlus } from "@mdi/js";
 
 import "./WorkingPage.css";
 import SwitchLanguageBar from "../components/SwitchLanguageBar.tsx";
-import AbstractModal from "../components/AbstractModal.tsx"
+import AbstractModal from "../components/AbstractModal.tsx";
+import TextFieldInput from "../components/TextFieldInput.tsx";
 import { 
   PAGINATION_RECORDS_NUM,
   backendURL,
   getCurrentTime,
   LoginToken,
 } from "../utility/utility.tsx";
-
 import {
   CaseInfo,
   RefreshTokenResponseData,
@@ -38,6 +38,29 @@ import {
 //        + "CaseName"
 //        + "AddUserID"
 //   3. casesData, this is the core data of Cases. 
+
+interface AddingCaseModalPropType {
+  message: string;
+  onCloseSignal: () => void;
+}
+
+function AddingCaseModal({ 
+  message,
+  onCloseSignal 
+}: AddingCaseModalPropType) {
+  return (
+    <AbstractModal 
+      message={message}
+      onCloseSignal={onCloseSignal}
+    >
+      <div className="case-id-input-container">
+        <TextFieldInput 
+          inputName="case-id-input input"
+        />
+      </div>
+    </AbstractModal>
+  );
+}
 
 interface CaseRowPropType {
   caseRow: CaseInfo;
@@ -62,7 +85,8 @@ function CasesTableToolbar({
   onAddCase
 }: CasesTableToolbarPropType) {
 
-  const [isShowingEditModal, setIsShowingEditModal] = useState<boolean>(false);
+  const { t } = useTranslation();
+  const [isShowingAddingCaseModal, setIsShowingAddingCaseModal] = useState<boolean>(false);
   const [addedCase, setAddedCase] = useState<CaseInfo>({
     caseID: "",
     caseName: "",
@@ -74,19 +98,18 @@ function CasesTableToolbar({
     <div className="cases-table-toolbar">
       <button 
         className="add-case"
-        onClick={() => setIsShowingEditModal(true)}
+        onClick={() => setIsShowingAddingCaseModal(true)}
       >
         <Icon 
           path={mdiPlus}
           size={1}
         />
       </button>
-      {isShowingEditModal && (
-        <AbstractModal 
-          onCloseSignal={() => setIsShowingEditModal(false)}
-        >
-          <input type="text" name="" id="" />
-        </AbstractModal>
+      {isShowingAddingCaseModal && (
+        <AddingCaseModal 
+          message={t("addingCaseModalTitle")}
+          onCloseSignal={() => setIsShowingAddingCaseModal(false)} 
+        />
       )}
     </div>
   );
@@ -255,7 +278,7 @@ function WorkingPage({
 
   return (
     <div className="working-page">
-      <SwitchLanguageBar />
+      <SwitchLanguageBar message={t("workingPageName")} />
       <div className="working-container">
         {(userClickedCaseID === null) ? (
           <CasesTableContainer 

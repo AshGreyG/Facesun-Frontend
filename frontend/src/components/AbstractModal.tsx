@@ -38,7 +38,7 @@ function AbstractModal({
           >
             <Icon
               path={mdiClose}
-              size={1}
+              size={0.8}
             />
           </button>
         </div>

@@ -21,37 +21,95 @@
 }
 
 .abstract-modal-background .modal-container {
-  position: absolute;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
   background-color: var(--main-background-color);
   padding: var(--modal-padding);
   border-radius: var(--panel-border-radius);
   min-width: 280px;
   max-width: min(560px, calc(100% - 48px));
-  height: 10%;
+  min-height: 140px;
+  max-height: min(560px, calc(100% -48px));
+  width: fit-content;
+  height: 0;
   top: 50%;
-  transform: translateY(calc(-50% - 87px));
+  transform: translateY(0);
   transition: 
     height 0.15s linear,
     transform 0.15s linear;
 }
 
 .abstract-modal-background.active .modal-container {
-  height: 40%;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  height: fit-content;
   top: 50%;
   transform: translateY(-50%);
   transition: 
-    height 0.5s linear,
-    transform 0.5s linear;
+    height 0.15s linear,
+    transform 0.15s linear;
 }
 
-.abstract-modal-background .modal-container .headline,
-.abstract-modal-background .modal-container .children-component {
+.abstract-modal-background .headline,
+.abstract-modal-background .children-component {
   opacity: 0;
   transition: opacity 0.15s linear;
 }
 
-.abstract-modal-background.active .modal-container .headline,
-.abstract-modal-background.active .modal-container .children-component {
+.abstract-modal-background.active .headline,
+.abstract-modal-background.active .children-component {
   opacity: 1;
-  transition: opacity 0.5s linear;
+  transition: opacity 0.15s linear;
+}
+
+.abstract-modal-background.active .headline {
+  height: 30px;
+}
+
+
+.abstract-modal-background .headline-title,
+.abstract-modal-background.active .headline-title {
+  float: left;
+  height: 30px;
+  width: fit-content;
+  padding-left: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--link-color);
+  font-weight: 600;
+}
+
+.abstract-modal-background .close-button,
+.abstract-modal-background.active .close-button {
+  float: right;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  right: 0;
+  position: relative;
+  height: 30px;
+  width: 30px;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: background-color 0.15s ease-in;
+  border-radius: 15px;
+}
+
+.abstract-modal-background.active .close-button:hover {
+  background-color: var(--_hover-icon-color);
+}
+
+.abstract-modal-background .children-component,
+.abstract-modal-background.active .children-component {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
