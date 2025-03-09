@@ -8,7 +8,7 @@ import React, {
 
 import axios, { 
   AxiosResponse, 
-  AxiosInstance 
+  AxiosInstance, 
 } from "axios";
 
 import { useTranslation } from "react-i18next";
@@ -131,6 +131,7 @@ function CaseRow({ caseRow }: CaseRowPropType) {
 }
 
 interface CasesTableToolbarPropType {
+  workingAPI: React.RefObject<AxiosInstance>;
   onAddCase: (addedCase: CaseInfo) => void;
 }
 
@@ -143,11 +144,11 @@ type AddingCaseError =
   | null;
 
 function CasesTableToolbar({
+  workingAPI,
   onAddCase
 }: CasesTableToolbarPropType) {
 
   const { t } = useTranslation();
-  const workingAPI = useContext(WorkingAPIContext);
   const [isShowingAddingCaseModal, setIsShowingAddingCaseModal] = useState<boolean>(false);
   const [addingCaseError, setAddingCaseError] = useState<AddingCaseError>(null);
 
@@ -159,6 +160,14 @@ function CasesTableToolbar({
   });
 
   function handleAddCase(caseID: string, caseName: string) {
+    workingAPI.current
+      .post("/cases/case", {
+        "case_id": caseID,
+        "case_name": caseName
+      })
+      .then((response) => {
+
+      });
     setAddedCase({
       ...addedCase,
       caseID: caseID,
@@ -233,18 +242,23 @@ function CasesTable({
 
 interface CasesTableContainerPropType {
   casesData: CaseInfo[];
+  workingAPI: React.RefObject<AxiosInstance>;
   onAddCase: (addedCase: CaseInfo) => void;
 }
 
 function CasesTableContainer({
   casesData,
+  workingAPI,
   onAddCase
 }: CasesTableContainerPropType) {
   const { t } = useTranslation();
 
   return (
     <div className="cases-table-container">
-      <CasesTableToolbar onAddCase={onAddCase} />
+      <CasesTableToolbar 
+        onAddCase={onAddCase} 
+        workingAPI={workingAPI}
+      />
       <CasesTable casesData={casesData} />
     </div>
   );
@@ -279,7 +293,7 @@ function WorkingPage({
   token,
   onChangeToken
 }: WorkingPagePropType) {
-  const WorkingAPIContext = createContext<AxiosInstance>(axios.create({
+  const workingAPI = useRef<AxiosInstance>(axios.create({
     baseURL: backendURL,
     timeout: 5000,
     headers: {
@@ -288,7 +302,7 @@ function WorkingPage({
     }
   }));
 
-  const RefreshTokenAPIContext = createContext<AxiosInstance>(axios.create({
+  const refreshTokenAPI = useRef<AxiosInstance>(axios.create({
     baseURL: backendURL,
     timeout: 5000,
     headers: {
@@ -296,9 +310,6 @@ function WorkingPage({
       "Content-Type": "application/json"
     }
   }));
-
-  const workingAPI = useContext<AxiosInstance>(WorkingAPIContext);
-  const refreshTokenAPI = useContext<AxiosInstance>(RefreshTokenAPIContext);
 
   const {t} = useTranslation();
   const [casesData, setCasesData] = useState<CaseInfo[]>([]);
@@ -310,7 +321,7 @@ function WorkingPage({
   const totalPaginationCount = useRef<number>(1);
 
   function handleAddCase(addedCase: CaseInfo) {
-    workingAPI
+    workingAPI.current
       .post("/cases/case", {
         "case_id":    addedCase.caseID,
         "case_name":  addedCase.caseName
@@ -328,7 +339,7 @@ function WorkingPage({
   }
 
   useEffect(() => {
-    workingAPI
+    workingAPI.current
       .get("/cases/case")
       .then((response: AxiosResponse<GetCasesResponseData, any>) => {
         const cases: CaseInfo[] = response.data.data.map((rawCase): CaseInfo => {
@@ -348,7 +359,7 @@ function WorkingPage({
           // If the serve response 401 status, then user need to refresh his
           // token, and re-store this token to the local storage.
 
-          refreshTokenAPI
+          refreshTokenAPI.current
             .post("/manager/refresh")
             .then((response: AxiosResponse<RefreshTokenResponseData, any>) => {
               onChangeToken({
@@ -369,23 +380,20 @@ function WorkingPage({
   // refresh token continuously.
 
   return (
-    <WorkingAPIContext.Provider value={workingAPI}>
-      <RefreshTokenAPIContext.Provider value={refreshTokenAPI}>
-        <div className="working-page">
-          <SwitchLanguageBar message={t("workingPageName")} />
-          <div className="working-container">
-            {(userClickedCaseID === null) ? (
-              <CasesTableContainer
-                casesData={casesData}
-                onAddCase={handleAddCase}
-              />
-            ) : (
-              <CluesTableContainer casesData={casesData} />
-            )}
-          </div>
-        </div>
-      </RefreshTokenAPIContext.Provider>
-    </WorkingAPIContext.Provider>
+    <div className="working-page">
+      <SwitchLanguageBar message={t("workingPageName")} />
+      <div className="working-container">
+        {(userClickedCaseID === null) ? (
+          <CasesTableContainer
+            casesData={casesData}
+            workingAPI={workingAPI}
+            onAddCase={handleAddCase}
+          />
+        ) : (
+          <CluesTableContainer casesData={casesData} />
+        )}
+      </div>
+    </div>
   );
 }
 
