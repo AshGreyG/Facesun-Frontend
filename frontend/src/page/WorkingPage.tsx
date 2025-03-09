@@ -1,10 +1,16 @@
 import React, { 
   useEffect, 
   useState,
-  useReducer,
+  createContext,
+  useContext,
   useRef
 } from "react";
-import axios, { AxiosResponse } from "axios";
+
+import axios, { 
+  AxiosResponse, 
+  AxiosInstance 
+} from "axios";
+
 import { useTranslation } from "react-i18next";
 import Icon from "@mdi/react";
 import { mdiPlus } from "@mdi/js";
@@ -12,13 +18,16 @@ import { mdiPlus } from "@mdi/js";
 import "./WorkingPage.css";
 import SwitchLanguageBar from "../components/SwitchLanguageBar.tsx";
 import AbstractModal from "../components/AbstractModal.tsx";
+import AlertModal from "../components/AlertModal.tsx";
 import TextFieldInput from "../components/TextFieldInput.tsx";
+
 import { 
   PAGINATION_RECORDS_NUM,
   backendURL,
   getCurrentTime,
   LoginToken,
 } from "../utility/utility.tsx";
+
 import {
   CaseInfo,
   RefreshTokenResponseData,
@@ -41,13 +50,30 @@ import {
 
 interface AddingCaseModalPropType {
   message: string;
+  handleAddCase: (caseID: string, caseName: string) => void;
   onCloseSignal: () => void;
 }
 
+/**
+ * @description 
+ * TextFieldInput is a common component, because the event handler
+ * function related to it is textInputChange, which is a common event handler (
+ * state `input` and `setInput`). But buttons are not so common because the
+ * event handlers related to them vary from different states and states set 
+ * functions.
+ * @param {AddingCaseModalPropType} param0
+ * @param {string} message
+ * 
+ */
 function AddingCaseModal({ 
   message,
-  onCloseSignal 
+  handleAddCase,
+  onCloseSignal
 }: AddingCaseModalPropType) {
+  const { t } = useTranslation();
+  const [caseIDInput, setCaseIDInput] = useState<string>("");
+  const [caseNameInput, setCaseNameInput] = useState<string>("");
+
   return (
     <AbstractModal 
       message={message}
@@ -55,8 +81,35 @@ function AddingCaseModal({
     >
       <div className="case-id-input-container">
         <TextFieldInput 
-          inputName="case-id-input input"
+          inputName="case-id-input"
+          placeholder={t("addingCaseModalCaseIDInputPlaceholder")}
+          textInputValue={caseIDInput}
+          onTextInputChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            setCaseIDInput(e.target.value);
+          }}
         />
+      </div>
+      <div className="case-name-input-container">
+        <TextFieldInput 
+          inputName="case-name-input"
+          placeholder={t("addingCaseModalCaseNameInputPlaceholder")}
+          textInputValue={caseNameInput}
+          onTextInputChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            setCaseNameInput(e.target.value);
+          }}
+        />
+      </div>
+      <div className="button-container">
+        <div className="cancel-button-container">
+          <button>
+            {t("cancelButton")}
+          </button>
+        </div>
+        <div className="confirm-button-container">
+          <button onClick={() => handleAddCase(caseIDInput, caseNameInput)}>
+            {t("confirmButton")}
+          </button>
+        </div>
       </div>
     </AbstractModal>
   );
@@ -81,18 +134,38 @@ interface CasesTableToolbarPropType {
   onAddCase: (addedCase: CaseInfo) => void;
 }
 
+type AddingCaseError = 
+  | "NetworkError"
+  | "CaseIDSyntaxError"
+  | "EmptyInputError"
+  | "TokenOutdatedError"
+  | "UnknownError"
+  | null;
+
 function CasesTableToolbar({
   onAddCase
 }: CasesTableToolbarPropType) {
 
   const { t } = useTranslation();
+  const workingAPI = useContext(WorkingAPIContext);
   const [isShowingAddingCaseModal, setIsShowingAddingCaseModal] = useState<boolean>(false);
+  const [addingCaseError, setAddingCaseError] = useState<AddingCaseError>(null);
+
   const [addedCase, setAddedCase] = useState<CaseInfo>({
     caseID: "",
     caseName: "",
     addUserID: "",
     clueCount: 0
   });
+
+  function handleAddCase(caseID: string, caseName: string) {
+    setAddedCase({
+      ...addedCase,
+      caseID: caseID,
+      caseName: caseName,
+      clueCount: 0
+    });
+  }
 
   return (
     <div className="cases-table-toolbar">
@@ -108,7 +181,23 @@ function CasesTableToolbar({
       {isShowingAddingCaseModal && (
         <AddingCaseModal 
           message={t("addingCaseModalTitle")}
+          handleAddCase={handleAddCase}
           onCloseSignal={() => setIsShowingAddingCaseModal(false)} 
+        />
+      )}
+      {addingCaseError && (
+        <AlertModal 
+          message={
+            getCurrentTime()
+              + addingCaseError === "NetworkError"
+              ? t("addingCaseNetworkError")
+              : addingCaseError === "CaseIDSyntaxError"
+              ? t("addingCaseIDSyntaxError")
+              : addingCaseError === "EmptyInputError"
+              ? t("addingCaseEmptyInputError")
+              : t("addingCaseUnknownError")
+          }
+          onCloseSignal={() => setAddingCaseError(null)}
         />
       )}
     </div>
@@ -190,23 +279,26 @@ function WorkingPage({
   token,
   onChangeToken
 }: WorkingPagePropType) {
-  const workingAPI = axios.create({
+  const WorkingAPIContext = createContext<AxiosInstance>(axios.create({
     baseURL: backendURL,
     timeout: 5000,
     headers: {
       "Authorization": "Bearer " + token.JWTAccessToken,
       "Content-Type": "application/json"
     }
-  });
+  }));
 
-  const refreshTokenAPI = axios.create({
+  const RefreshTokenAPIContext = createContext<AxiosInstance>(axios.create({
     baseURL: backendURL,
     timeout: 5000,
     headers: {
       "Authorization": "Bearer " + token.JWTRefreshToken,
       "Content-Type": "application/json"
     }
-  });
+  }));
+
+  const workingAPI = useContext<AxiosInstance>(WorkingAPIContext);
+  const refreshTokenAPI = useContext<AxiosInstance>(RefreshTokenAPIContext);
 
   const {t} = useTranslation();
   const [casesData, setCasesData] = useState<CaseInfo[]>([]);
@@ -277,19 +369,23 @@ function WorkingPage({
   // refresh token continuously.
 
   return (
-    <div className="working-page">
-      <SwitchLanguageBar message={t("workingPageName")} />
-      <div className="working-container">
-        {(userClickedCaseID === null) ? (
-          <CasesTableContainer 
-            casesData={casesData}
-            onAddCase={handleAddCase}
-          />
-        ) : (
-          <CluesTableContainer casesData={casesData} />
-        )}
-      </div>
-    </div>
+    <WorkingAPIContext.Provider value={workingAPI}>
+      <RefreshTokenAPIContext.Provider value={refreshTokenAPI}>
+        <div className="working-page">
+          <SwitchLanguageBar message={t("workingPageName")} />
+          <div className="working-container">
+            {(userClickedCaseID === null) ? (
+              <CasesTableContainer
+                casesData={casesData}
+                onAddCase={handleAddCase}
+              />
+            ) : (
+              <CluesTableContainer casesData={casesData} />
+            )}
+          </div>
+        </div>
+      </RefreshTokenAPIContext.Provider>
+    </WorkingAPIContext.Provider>
   );
 }
 

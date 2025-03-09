@@ -11,6 +11,7 @@
         | EditButton -> *casesData
         | DeleteButton -> *casesData
     - CasesToolbar
+      - AddingCaseModal
       | SelectMenu -> *queryField
       | TextInput -> *queryText
       | RefreshButton -> axios -> casesData

@@ -12,6 +12,11 @@
   --_hover-icon-color: rgba(0, 0, 0, 0.1);
   --shadow-opacity-color: rgba(0, 0, 0, 0.2);
   --table-border-color: #d0c5b4;
+  --input-border-color: #745b19;
+  --cancel-button-background-color: #f4ede4;
+  --cancel-button-border-color: #745b19;
+  --confirm-button-background-color: #f5e1bb;
+  --_hover--confirm-button-background-color: #d5c099;
 
   /* size */
 
@@ -22,4 +27,10 @@
   --switch-language-bar-height: 60px;
   --switch-language-bar-width: 100%;
   --modal-padding: 10px;
+  --input-border-radius: 3px;
+  --input-padding: 6px;
+  --input-margin: 10px;
+  --cancel-or-confirm-button-padding-top-bottom: 6px;
+  --cancel-or-confirm-button-padding-left-right: 24px;
+  --cancel-or-confirm-button-border-radius: 10px;
 }

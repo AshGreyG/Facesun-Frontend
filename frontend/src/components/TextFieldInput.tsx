@@ -1,20 +1,30 @@
 import React from "react";
 
+import "./TextFieldInput.css"
+
 interface TextFieldInputPropType {
   inputName: string;
   placeholder?: string;
+  textInputValue?: string;
+  onTextInputChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 function TextFieldInput({ 
   inputName,
-  placeholder 
+  placeholder,
+  textInputValue,
+  onTextInputChange
 }: TextFieldInputPropType) {
   return (
-    <input
-      type="text" 
-      className={inputName}
-      placeholder={placeholder}
-    />
+    <div className="text-field-container">
+      <input
+        type="text"
+        className={`${inputName} text-field-input`}
+        placeholder={placeholder}
+        value={textInputValue}
+        onChange={onTextInputChange}
+      />
+    </div>
   );
 }
 

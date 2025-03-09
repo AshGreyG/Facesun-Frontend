@@ -1,0 +1,18 @@
+@import url(../utility/global.css);
+
+.text-field-input {
+  background-color: transparent;
+  border: none;
+  color: var(--link-color);
+}
+
+.text-field-input:focus {
+  outline: none;
+}
+
+.text-field-container {
+  border: 1px solid var(--link-color);
+  border-radius: var(--input-border-radius);
+  padding: var(--input-padding);
+  margin: var(--input-margin);
+}

@@ -68,7 +68,6 @@
   height: 30px;
 }
 
-
 .abstract-modal-background .headline-title,
 .abstract-modal-background.active .headline-title {
   float: left;
@@ -107,6 +106,8 @@
 
 .abstract-modal-background .children-component,
 .abstract-modal-background.active .children-component {
+  padding-top: var(--modal-padding);
+  padding-bottom: var(--modal-padding);
   flex: 1;
   display: flex;
   flex-direction: column;
