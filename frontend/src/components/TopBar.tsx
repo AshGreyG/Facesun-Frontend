@@ -3,15 +3,15 @@ import Icon from "@mdi/react"
 import { mdiTranslate } from "@mdi/js"
 import { useTranslation } from "react-i18next";
 
-import "./SwitchLanguageBar.css"
+import "./TopBar.css"
 
-interface SwitchLanguageBarPropType {
+interface TopBarPropType {
   message?: string;
 }
 
-function SwitchLanguageBar({ 
+function TopBar({ 
   message,
-}: SwitchLanguageBarPropType) {
+}: TopBarPropType) {
   const { i18n } = useTranslation();
 
   function handleSwitchLanguage() {
@@ -42,4 +42,4 @@ function SwitchLanguageBar({
   );
 }
 
-export default SwitchLanguageBar;
+export default TopBar;

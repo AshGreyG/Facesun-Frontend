@@ -1,0 +1,6 @@
+@import url(../utility/global.css);
+
+.alert-modal-container {
+  padding: 0 20px;
+  color: var(--link-color);
+}

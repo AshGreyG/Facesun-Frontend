@@ -4,7 +4,10 @@ import { useTranslation } from "react-i18next";
 import axios, { AxiosResponse } from "axios";
 
 import "./LoginPage.css";
-import SwitchLanguageBar from "../components/SwitchLanguageBar.tsx";
+import TopBar from "../components/TopBar.tsx";
+import AlertModal from "../components/AlertModal.tsx";
+import AnimatedLabel from "../components/AnimatedLabel.tsx";
+
 import { 
   backendURL,
   getCurrentTime,
@@ -15,28 +18,6 @@ import {
   LoginTokenResponseData,
   ErrorResponse
 } from "../utility/interface.tsx";
-
-interface AnimatedLabelPropType {
-  content: string
-};
-
-function AnimatedLabel({ content }: AnimatedLabelPropType) {
-  const characters: string[] = content.split("");
-
-  return (
-    <label>
-      {characters.map((letter, idx) => (
-        <span
-          key={idx}
-          className="animated-letter"
-          style={{ transitionDelay: `${idx * 50}ms` }}
-        >
-          {letter}
-        </span>
-      ))}
-    </label>
-  )
-}
 
 /**
  * @description This is the interface of component function {@link LoginPage}
@@ -63,10 +44,10 @@ type LoginStatus =
   | "Pending";
 
 /**
- * @param {LoginToken} token - The login token of user, passed by App entry
+ * @param {LoginToken} token The login token of user, passed by App entry
  * component. The token is stored in local storage.
  * @param {React.Dispatch<React.SetStateAction<LoginToken>>} onChangeToken
- * - The set function of parameter `token`, passed by App entry component.
+ * The set function of parameter `token`, passed by App entry component.
  */
 function LoginPage({ token, onChangeToken }: LoginPagePropType) {
   const loginAPI = axios.create({
@@ -76,7 +57,7 @@ function LoginPage({ token, onChangeToken }: LoginPagePropType) {
       "Content-Type": "application/json"
     }
   });
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [loginStatus, setLoginStatus] = useState<LoginStatus>("Pending");
@@ -94,15 +75,6 @@ function LoginPage({ token, onChangeToken }: LoginPagePropType) {
           JWTAccessToken: response.data.access_token,
           JWTRefreshToken: response.data.refresh_token
         });
-
-        console.log(
-          "[" + getCurrentTime() + "]: User logins successfully.",
-          "Its access token is ",
-          token.JWTAccessToken,
-          ". Its refresh token is ",
-          token.JWTRefreshToken
-        );  // This needs to be removed when in real environment.
-
         setLoginStatus("Success");
         setTimeout(() => navigate("/working"), 3000);
       })
@@ -117,12 +89,11 @@ function LoginPage({ token, onChangeToken }: LoginPagePropType) {
 
   function handleRegister() {
     // navigate("/");
-    alert("You clicked register.")
   };
 
   return (
     <div className="login-page">
-      <SwitchLanguageBar />
+      <TopBar />
       <div className="login-container">
         <h1>{t("loginPage")}</h1>
         <form onSubmit={(event) => event.preventDefault()}>
@@ -162,6 +133,24 @@ function LoginPage({ token, onChangeToken }: LoginPagePropType) {
           </p>
         </form>
       </div>
+      {(loginStatus === "Success") &&
+        <AlertModal 
+          message={t("loginInfoSuccess")}
+          onCloseSignal={() => setLoginStatus("Pending")}
+        />
+      }
+      {(loginStatus === "Fail") && 
+        <AlertModal
+          message={"[" + getCurrentTime() + "]: " + t("loginInfoFail")}
+          onCloseSignal={() => setLoginStatus("Pending")}
+        />
+      }
+      {(loginStatus === "Unknown Error") &&
+        <AlertModal
+          message={"[" + getCurrentTime() + "]: " + t("loginInfoUnknownError")}
+          onCloseSignal={() => setLoginStatus("Pending")}
+        />
+      }
     </div>
   );
 }

@@ -16,7 +16,8 @@
   --cancel-button-background-color: #f4ede4;
   --cancel-button-border-color: #745b19;
   --confirm-button-background-color: #f5e1bb;
-  --_hover--confirm-button-background-color: #d5c099;
+  --_hover-confirm-button-background-color: #d5c099;
+  --_hover-cancel-button-background-color: #f5e1bb;
 
   /* size */
 

@@ -35,23 +35,19 @@ interface AbstractModalPropType {
 }
 
 /**
- * @description 
- * This component is like the base class of different modals,
+ * @description This component is like the base class of different modals,
  * such as `AlertModal` and `AddCaseModal` etc. It receives children components
  * to render them in its UI region and messages to show them at the top-left
  * corner of it.
  * @param {AbstractModalPropType} param0 
- * @param {string} param0.message
- * An optional property, it is the message shown on the left-top corner of the 
- * modal derived from this `AbstractModal`
- * @param {React.ReactNode} param0.children 
- * The children components or React nodes in the `AbstractModal`, such as 'AlertModel' 
- * is the derived component of 'AbstractModal', it has message React node.
- * @param {() => void} param0.onCloseSignal 
- * The outer close event handler function passed by props. The `close-button` will 
- * trigger this `onCloseSignal`function
- * @returns 
- * This function returns the `AbstractModal` component, which is the
+ * @param {string} param0.message An optional property, it is the message shown 
+ * on the left-top corner of the modal derived from this `AbstractModal`
+ * @param {React.ReactNode} param0.children The children components or React nodes 
+ * in the `AbstractModal`, such as 'AlertModel' is the derived component of 
+ * 'AbstractModal', it has message React node.
+ * @param {() => void} param0.onCloseSignal The outer close event handler function 
+ * passed by props. The `close-button` will trigger this `onCloseSignal`function
+ * @returns This function returns the `AbstractModal` component, which is the
  * base component of other `*Modal`s
  */
 function AbstractModal({

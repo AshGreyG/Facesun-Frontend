@@ -1,6 +1,7 @@
 import React from "react";
 
 import AbstractModal from "./AbstractModal.tsx";
+import "./AlertModal.css"
 
 interface AlertModalPropType {
   message: string;

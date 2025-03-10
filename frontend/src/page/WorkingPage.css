@@ -15,7 +15,7 @@
 
 .working-container {
   background-color: var(--container-background-color);
-  margin-top: 60px;
+  margin-top: 120px;
   margin-bottom: 60px;
   padding: 20px 40px;
   border-radius: var(--panel-border-radius);
@@ -114,6 +114,9 @@
   cursor: pointer;
   border: 1px solid var(--cancel-button-border-color);
   border-radius: var(--cancel-or-confirm-button-border-radius);
+  transition: 
+    background-color 0.3s ease-out,
+    box-shadow 0.3s ease-out;
 }
 
 .active .confirm-button-container {
@@ -141,12 +144,40 @@
 }
 
 .active .confirm-button-container button:hover {
-  background-color: var(--_hover--confirm-button-background-color);
-  border: 1px solid var(--_hover--confirm-button-background-color);
+  background-color: var(--_hover-confirm-button-background-color);
+  border: 1px solid var(--_hover-confirm-button-background-color);
+  box-shadow: 2px 2px 2px var(--shadow-opacity-color);
+}
+
+.active .cancel-button-container button:hover {
+  background-color: var(--_hover-cancel-button-background-color);
   box-shadow: 2px 2px 2px var(--shadow-opacity-color);
 }
 
 .abstract-modal-background:not(.active) .confirm-button-container button,
 .abstract-modal-background:not(.active) .cancel-button-container button {
   opacity: 0;
+}
+
+.cases-table .buttons-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.cases-table .buttons-container button {
+  height: 20px;
+  width: 20px;
+  border-radius: 10px;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.cases-table .buttons-container button:hover {
+  background-color: var(--_hover-icon-color);
 }

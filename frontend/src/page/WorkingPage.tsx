@@ -11,12 +11,19 @@ import axios, {
   AxiosInstance, 
 } from "axios";
 
+import { jwtDecode } from "jwt-decode"
 import { useTranslation } from "react-i18next";
 import Icon from "@mdi/react";
-import { mdiPlus } from "@mdi/js";
+
+import { 
+  mdiPlus,
+  mdiPencil,
+  mdiDotsHorizontal,
+  mdiTrashCanOutline
+} from "@mdi/js";
 
 import "./WorkingPage.css";
-import SwitchLanguageBar from "../components/SwitchLanguageBar.tsx";
+import TopBar from "../components/TopBar.tsx";
 import AbstractModal from "../components/AbstractModal.tsx";
 import AlertModal from "../components/AlertModal.tsx";
 import TextFieldInput from "../components/TextFieldInput.tsx";
@@ -55,8 +62,7 @@ interface AddingCaseModalPropType {
 }
 
 /**
- * @description 
- * TextFieldInput is a common component, because the event handler
+ * @description TextFieldInput is a common component, because the event handler
  * function related to it is textInputChange, which is a common event handler (
  * state `input` and `setInput`). But buttons are not so common because the
  * event handlers related to them vary from different states and states set 
@@ -101,7 +107,7 @@ function AddingCaseModal({
       </div>
       <div className="button-container">
         <div className="cancel-button-container">
-          <button>
+          <button onClick={() => onCloseSignal()}>
             {t("cancelButton")}
           </button>
         </div>
@@ -126,54 +132,87 @@ function CaseRow({ caseRow }: CaseRowPropType) {
       <th scope="col" key={2}>{caseRow.caseName}</th>
       <th scope="col" key={3}>{caseRow.clueCount}</th>
       <th scope="col" key={4}>{caseRow.addUserID}</th>
+      <th scope="col" key={5}>
+        <div className="buttons-container">
+          <div className="edit-button-container">
+            <button
+              className="edit-case"
+            >
+              <Icon 
+                path={mdiPencil}
+                size={0.6}
+              />
+            </button>
+          </div>
+          <div className="clues-button-container">
+            <button 
+              className="check-clues"
+            >
+              <Icon 
+                path={mdiDotsHorizontal}
+                size={0.6}
+              />
+            </button>
+          </div>
+          <div className="delete-button-container">
+            <button className="delete-case">
+              <Icon 
+                path={mdiTrashCanOutline}
+                size={0.6}
+              />
+            </button>
+          </div>
+        </div>
+      </th>
     </tr>
   );
 }
 
 interface CasesTableToolbarPropType {
-  workingAPI: React.RefObject<AxiosInstance>;
   onAddCase: (addedCase: CaseInfo) => void;
+  checkCaseIDRepeated: (caseID: string) => boolean;
 }
 
 type AddingCaseError = 
   | "NetworkError"
   | "CaseIDSyntaxError"
+  | "CaseIDRepeatedError"
   | "EmptyInputError"
   | "TokenOutdatedError"
   | "UnknownError"
   | null;
 
 function CasesTableToolbar({
-  workingAPI,
-  onAddCase
+  onAddCase,
+  checkCaseIDRepeated
 }: CasesTableToolbarPropType) {
 
   const { t } = useTranslation();
   const [isShowingAddingCaseModal, setIsShowingAddingCaseModal] = useState<boolean>(false);
   const [addingCaseError, setAddingCaseError] = useState<AddingCaseError>(null);
 
-  const [addedCase, setAddedCase] = useState<CaseInfo>({
-    caseID: "",
-    caseName: "",
-    addUserID: "",
-    clueCount: 0
-  });
-
   function handleAddCase(caseID: string, caseName: string) {
-    workingAPI.current
-      .post("/cases/case", {
-        "case_id": caseID,
-        "case_name": caseName
-      })
-      .then((response) => {
-
-      });
-    setAddedCase({
-      ...addedCase,
+    if (caseID === "" || caseName === "") {
+      setAddingCaseError("EmptyInputError");
+      return;
+    }
+    if (!caseID.match(/^A\d{22}$/)) {
+      setAddingCaseError("CaseIDSyntaxError");
+      return;
+    }
+    if (checkCaseIDRepeated(caseID)) {
+      setAddingCaseError("CaseIDRepeatedError");
+      return;
+    }
+    onAddCase({
       caseID: caseID,
       caseName: caseName,
+      addUserID: "",
       clueCount: 0
     });
+    
+    // Actually there is no need to pass the `WorkingAPI` or `RefreshTokenAPI` to the
+    // children components, we only need to pass event handlers using those APIs.
   }
 
   return (
@@ -197,14 +236,18 @@ function CasesTableToolbar({
       {addingCaseError && (
         <AlertModal 
           message={
-            getCurrentTime()
-              + addingCaseError === "NetworkError"
+            "[" + getCurrentTime() + "]: "
+              + (addingCaseError === "NetworkError"
               ? t("addingCaseNetworkError")
               : addingCaseError === "CaseIDSyntaxError"
               ? t("addingCaseIDSyntaxError")
               : addingCaseError === "EmptyInputError"
               ? t("addingCaseEmptyInputError")
-              : t("addingCaseUnknownError")
+              : addingCaseError === "CaseIDRepeatedError"
+              ? t("addingCaseIDRepeatedError")
+              : addingCaseError === "TokenOutdatedError"
+              ? t("addingCaseTokenOutdatedError")
+              : t("addingCaseUnknownError"))
           }
           onCloseSignal={() => setAddingCaseError(null)}
         />
@@ -229,6 +272,7 @@ function CasesTable({
           <th scope="col" key={2}>{t("caseName")}</th>
           <th scope="col" key={3}>{t("clueCount")}</th>
           <th scope="col" key={4}>{t("addUserID")}</th>
+          <th scope="col" key={5}>{t("editButtons")}</th>
         </tr>
       </thead>
       <tbody>
@@ -242,14 +286,14 @@ function CasesTable({
 
 interface CasesTableContainerPropType {
   casesData: CaseInfo[];
-  workingAPI: React.RefObject<AxiosInstance>;
   onAddCase: (addedCase: CaseInfo) => void;
+  checkCaseIDRepeated: (caseID: string) => boolean;
 }
 
 function CasesTableContainer({
   casesData,
-  workingAPI,
-  onAddCase
+  onAddCase,
+  checkCaseIDRepeated
 }: CasesTableContainerPropType) {
   const { t } = useTranslation();
 
@@ -257,7 +301,7 @@ function CasesTableContainer({
     <div className="cases-table-container">
       <CasesTableToolbar 
         onAddCase={onAddCase} 
-        workingAPI={workingAPI}
+        checkCaseIDRepeated={checkCaseIDRepeated}
       />
       <CasesTable casesData={casesData} />
     </div>
@@ -311,7 +355,9 @@ function WorkingPage({
     }
   }));
 
-  const {t} = useTranslation();
+  const userID = useRef(jwtDecode(token.JWTAccessToken));
+
+  const { t } = useTranslation();
   const [casesData, setCasesData] = useState<CaseInfo[]>([]);
   const [userClickedCaseID, setUserClickedCaseID] = useState<string | null>(null);
   const [queryField, setQueryField] = useState<QueryFieldType>("CaseID");
@@ -330,7 +376,7 @@ function WorkingPage({
         console.log(response.data);
       });
 
-    // setCasesData([addedCase, ...casesData]);
+    setCasesData([addedCase, ...casesData]);
     totalPaginationCount.current
       = ((casesData.length - 1) + 1) / PAGINATION_RECORDS_NUM + 1;
     
@@ -338,7 +384,17 @@ function WorkingPage({
     // the same with previous state. So here we need manually add the 1.
   }
 
+  function checkCaseIDRepeated(caseID: string): boolean {
+    for (const caseData of casesData) {
+      if (caseData.caseID === caseID) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   useEffect(() => {
+    console.log(userID);
     workingAPI.current
       .get("/cases/case")
       .then((response: AxiosResponse<GetCasesResponseData, any>) => {
@@ -381,13 +437,13 @@ function WorkingPage({
 
   return (
     <div className="working-page">
-      <SwitchLanguageBar message={t("workingPageName")} />
+      <TopBar message={t("workingPageName")} />
       <div className="working-container">
         {(userClickedCaseID === null) ? (
           <CasesTableContainer
             casesData={casesData}
-            workingAPI={workingAPI}
             onAddCase={handleAddCase}
+            checkCaseIDRepeated={checkCaseIDRepeated}
           />
         ) : (
           <CluesTableContainer casesData={casesData} />
