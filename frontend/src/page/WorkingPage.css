@@ -26,7 +26,6 @@
 .cases-table-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
   overflow: auto;
   margin-bottom: 30px;
@@ -180,4 +179,45 @@
 
 .cases-table .buttons-container button:hover {
   background-color: var(--_hover-icon-color);
+}
+
+.cases-table-toolbar {
+  height: 60px;
+}
+
+.cases-table-toolbar .button-components {
+  float: right;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.cases-table-toolbar .button-components button {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  background-color: transparent;
+  border: none;
+  height: 30px;
+  width: 30px;
+  border-radius: 15px;
+  transition: background-color 0.15s ease-in;
+}
+
+.cases-table-toolbar .button-components button:hover {
+  background-color: var(--_hover-icon-color);
+}
+
+.cases-table-toolbar .query-form-container {
+  height: 100%;
+  float: left;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }

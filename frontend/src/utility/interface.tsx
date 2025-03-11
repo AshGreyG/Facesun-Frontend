@@ -29,6 +29,25 @@ export interface GetCasesResponseData {
   message: string;
 }
 
+export interface RawGetCurrentUserResponseData {
+  data: {
+    users: {
+      default_phone: string | null;
+      id: number;
+      is_admin: boolean;
+      username: string;
+    }
+  }
+  message: string;
+}
+
+export interface UserInfo {
+  defaultPhoneNumber?: string | null;
+  userID: number;
+  isAdmin: boolean;
+  userName: string;
+}
+
 export interface AddCaseResponseData {
   message: string;
 }

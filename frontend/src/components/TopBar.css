@@ -1,6 +1,6 @@
 @import url(../utility/global.css);
 
-.switch-language-bar {
+.top-bar {
   padding: 
     var(--switch-language-bar-padding-top-bottom) 
     var(--switch-language-bar-padding-left-right);
@@ -14,7 +14,7 @@
   z-index: 10;
 }
 
-.switch-button {
+.top-bar-button {
   right: 0;
   position: relative;
   float: right;
@@ -33,7 +33,7 @@
   transition: background-color 0.15s ease-in;
 }
 
-.switch-button:hover {
+.top-bar-button:hover {
   background-color: var(--_hover-icon-color);
 }
 

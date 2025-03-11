@@ -18,6 +18,7 @@ const languageResources = {
       "loginButtonContent": "Login",
       "noAccountInfo": "Don't have an account?",
       "registerButtonContent": "Register here",
+
       "loginInfoSuccess": "Login successfully, please wait for 3s",
       "loginInfoFail": "Login failed, the username or password is incorrect or does not exist",
       "loginInfoUnknownError": "Unknown error occurs",
@@ -33,12 +34,18 @@ const languageResources = {
       "addingCaseModalTitle": "Add Case",
       "addingCaseModalCaseIDInputPlaceholder": "Case ID",
       "addingCaseModalCaseNameInputPlaceholder": "Case Name",
+      "queryTextInputPlaceholder": "Query for something...",
+
       "addingCaseNetworkError": "Network error occurs, please refresh your web page or check your network",
       "addingCaseIDSyntaxError": "Wrong case ID, please check your case ID and retry later",
       "addingCaseEmptyInputError": "Case ID or Case Name input field are empty",
       "addingCaseIDRepeatedError": "Repeated Case ID",
       "addingCaseTokenOutdatedError": "Your access token is out of date, please refresh your web page and retry",
-      "addingCaseUnknownError": "Unknown error occurs"
+      "addingCaseUnknownError": "Unknown error occurs",
+      "workingPageLoadingRefreshTokenOutdatedError": "Your refresh token has been outdated, the page will navigate to login page automatically in 3s",
+      "workingPageLoadingGetCasesUnknownError": "Unknown error occurs when getting cases",
+      "workingPageLoadingGetCurrentUserUnknownError": "Unknown error occurs when getting current user info",
+      "workingPageLoadingUnknownError": "Unknown error occurs"
     }
   },
   zh: {
@@ -58,6 +65,7 @@ const languageResources = {
       "loginButtonContent": "登录",
       "noAccountInfo": "还没有账号？",
       "registerButtonContent": "在这里注册",
+
       "loginInfoSuccess": "登录成功，等待 3 秒后自动跳转",
       "loginInfoFail": "登录失败，用户名或密码可能错误或者不存在",
       "loginInfoUnknownError": "未知错误",
@@ -72,12 +80,18 @@ const languageResources = {
       "addingCaseModalTitle": "增加案件",
       "addingCaseModalCaseIDInputPlaceholder": "案件编号",
       "addingCaseModalCaseNameInputPlaceholder": "案件名称",
+      "queryTextInputPlaceholder": "搜索...",
+
       "addingCaseNetworkError": "网络错误，请刷新页面或检查您的网络",
       "addingCaseIDSyntaxError": "案件编号错误，请检查案件编号并重试",
       "addingCaseEmptyInputError": "案件编号或案件名称为空",
       "addingCaseIDRepeatedError": "案件编号重复",
       "addingCaseTokenOutdatedError": "您的 token 已过期，请刷新页面重试",
-      "addingCaseUnknownError": "未知错误"
+      "addingCaseUnknownError": "未知错误",
+      "workingPageLoadingRefreshTokenOutdatedError": "您的 refresh token 已过期，将在 3 秒内自动跳回登录页面",
+      "workingPageLoadingGetCasesUnknownError": "在获取案件列表时发生未知错误",
+      "workingPageLoadingGetCurrentUserUnknownError": "在获取用户信息时发生未知错误",
+      "workingPageLoadingUnknownError": "未知错误"
     }
   }
 };

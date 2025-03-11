@@ -1,8 +1,6 @@
 import React, { 
   useEffect, 
   useState,
-  createContext,
-  useContext,
   useRef
 } from "react";
 
@@ -11,15 +9,16 @@ import axios, {
   AxiosInstance, 
 } from "axios";
 
-import { jwtDecode } from "jwt-decode"
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import Icon from "@mdi/react";
 
 import { 
   mdiPlus,
   mdiPencil,
   mdiDotsHorizontal,
-  mdiTrashCanOutline
+  mdiTrashCanOutline,
+  mdiRefresh
 } from "@mdi/js";
 
 import "./WorkingPage.css";
@@ -39,6 +38,8 @@ import {
   CaseInfo,
   RefreshTokenResponseData,
   GetCasesResponseData,
+  RawGetCurrentUserResponseData,
+  UserInfo,
   ErrorResponse
 } from "../utility/interface.tsx";
 
@@ -62,7 +63,7 @@ interface AddingCaseModalPropType {
 }
 
 /**
- * @description TextFieldInput is a common component, because the event handler
+ * @description `TextFieldInput` is a common component, because the event handler
  * function related to it is textInputChange, which is a common event handler (
  * state `input` and `setInput`). But buttons are not so common because the
  * event handlers related to them vary from different states and states set 
@@ -182,6 +183,13 @@ type AddingCaseError =
   | "UnknownError"
   | null;
 
+/**
+ * @description `CasesTableToolbar` includes those functions: 
+ * - Use a `TextFieldInput` to query the corresponding records;
+ * - Use a button to add case, and there will be a @see {AddingCaseModal}
+ *   `AddingCaseModal` to input the caseID and caseName
+ * 
+ */
 function CasesTableToolbar({
   onAddCase,
   checkCaseIDRepeated
@@ -217,35 +225,58 @@ function CasesTableToolbar({
 
   return (
     <div className="cases-table-toolbar">
-      <button 
-        className="add-case"
-        onClick={() => setIsShowingAddingCaseModal(true)}
-      >
-        <Icon 
-          path={mdiPlus}
-          size={1}
-        />
-      </button>
+      <div className="query-form-container">
+        <form 
+          className="query-form"
+          onSubmit={(e) => e.preventDefault()}
+        >
+          <TextFieldInput 
+            inputName="query-text-field"
+            placeholder={t("queryTextInputPlaceholder")}
+          />
+        </form>
+      </div>
+      <div className="button-components">
+        <div className="add-case-button-container">
+          <button
+            className="add-case-button"
+            onClick={() => setIsShowingAddingCaseModal(true)}
+          >
+            <Icon
+              path={mdiPlus}
+              size={1}
+            />
+          </button>
+        </div>
+        <div className="force-refresh-button-container">
+          <button className="force-refresh-button">
+            <Icon
+              path={mdiRefresh}
+              size={1}
+            />
+          </button>
+        </div>
+      </div>
       {isShowingAddingCaseModal && (
-        <AddingCaseModal 
+        <AddingCaseModal
           message={t("addingCaseModalTitle")}
           handleAddCase={handleAddCase}
-          onCloseSignal={() => setIsShowingAddingCaseModal(false)} 
+          onCloseSignal={() => setIsShowingAddingCaseModal(false)}
         />
       )}
       {addingCaseError && (
         <AlertModal 
           message={
             "[" + getCurrentTime() + "]: "
-              + (addingCaseError === "NetworkError"
+              +  (addingCaseError === "NetworkError"
               ? t("addingCaseNetworkError")
-              : addingCaseError === "CaseIDSyntaxError"
+              :   addingCaseError === "CaseIDSyntaxError"
               ? t("addingCaseIDSyntaxError")
-              : addingCaseError === "EmptyInputError"
+              :   addingCaseError === "EmptyInputError"
               ? t("addingCaseEmptyInputError")
-              : addingCaseError === "CaseIDRepeatedError"
+              :   addingCaseError === "CaseIDRepeatedError"
               ? t("addingCaseIDRepeatedError")
-              : addingCaseError === "TokenOutdatedError"
+              :   addingCaseError === "TokenOutdatedError"
               ? t("addingCaseTokenOutdatedError")
               : t("addingCaseUnknownError"))
           }
@@ -295,7 +326,6 @@ function CasesTableContainer({
   onAddCase,
   checkCaseIDRepeated
 }: CasesTableContainerPropType) {
-  const { t } = useTranslation();
 
   return (
     <div className="cases-table-container">
@@ -333,6 +363,12 @@ type QueryFieldType =
   | "CaseName"
   | "AddUserID";
 
+type WorkingPageLoadingError =
+  | "RefreshTokenOutdatedError"
+  | "GetCasesUnknownError"
+  | "GetCurrentUserUnknownError"
+  | null;
+
 function WorkingPage({
   token,
   onChangeToken
@@ -355,14 +391,15 @@ function WorkingPage({
     }
   }));
 
-  const userID = useRef(jwtDecode(token.JWTAccessToken));
+  const userInfo = useRef<UserInfo | null>(null);
+
+  const navigate = useNavigate();
 
   const { t } = useTranslation();
   const [casesData, setCasesData] = useState<CaseInfo[]>([]);
   const [userClickedCaseID, setUserClickedCaseID] = useState<string | null>(null);
-  const [queryField, setQueryField] = useState<QueryFieldType>("CaseID");
-  const [queryText, setQueryText] = useState<string>("");
   const [paginationIndex, setPaginationIndex] = useState<number>(1);
+  const [workingPageError, setWorkingPageError] = useState<WorkingPageLoadingError>(null);
 
   const totalPaginationCount = useRef<number>(1);
 
@@ -393,8 +430,19 @@ function WorkingPage({
     return false;
   }
 
+  function handleQueryTextField(queryField: QueryFieldType, queryText: string) {
+
+  }
+
+  function handleDeleteCase() {
+
+  }
+
+  function handleChangeCase() {
+
+  }
+
   useEffect(() => {
-    console.log(userID);
     workingAPI.current
       .get("/cases/case")
       .then((response: AxiosResponse<GetCasesResponseData, any>) => {
@@ -424,12 +472,35 @@ function WorkingPage({
               });
             })
             .catch((error: ErrorResponse) => {
-              alert("❌ Can't update");
+              setWorkingPageError("RefreshTokenOutdatedError");
+              setTimeout(() => {
+                setWorkingPageError(null);
+                navigate("/login");
+              }, 3000);
             })
         } else {
-          alert("Unknown Error");
+          setWorkingPageError("GetCasesUnknownError");
         }
+      });
+
+    workingAPI.current
+      .get("/manager/getCurrentUser")
+      .then((response: AxiosResponse<RawGetCurrentUserResponseData, any>) => {
+        userInfo.current = {
+          defaultPhoneNumber: response.data.data.users.default_phone,
+          userID:             response.data.data.users.id,
+          isAdmin:            response.data.data.users.is_admin,
+          userName:           response.data.data.users.username,
+        } as UserInfo;
       })
+      .catch((error: ErrorResponse) => {
+        setWorkingPageError("GetCurrentUserUnknownError");
+
+        // We have refreshed token in getting cases process, if there is still a
+        // 401 error, it's unnecessary to refresh token again.
+      })
+
+
   }, []);
 
   // If there add 'workingAPI' to the dependency array, then the page will
@@ -437,7 +508,10 @@ function WorkingPage({
 
   return (
     <div className="working-page">
-      <TopBar message={t("workingPageName")} />
+      <TopBar 
+        isAdmin={userInfo.current?.isAdmin}
+        message={t("workingPageName")} 
+      />
       <div className="working-container">
         {(userClickedCaseID === null) ? (
           <CasesTableContainer
@@ -449,6 +523,21 @@ function WorkingPage({
           <CluesTableContainer casesData={casesData} />
         )}
       </div>
+      {workingPageError &&
+        <AlertModal 
+          message={
+            "[" + getCurrentTime() + "]: "
+            +  (workingPageError === "RefreshTokenOutdatedError"
+            ? t("workingPageLoadingRefreshTokenOutdatedError")
+            :   workingPageError === "GetCasesUnknownError"
+            ? t("workingPageLoadingGetCasesUnknownError")
+            :   workingPageError === "GetCurrentUserUnknownError"
+            ? t("workingPageLoadingGetCurrentUserUnknownError")
+            : t("workingPageLoadingUnknownError"))
+          }
+          onCloseSignal={() => setWorkingPageError(null)}
+        />
+      }
     </div>
   );
 }
