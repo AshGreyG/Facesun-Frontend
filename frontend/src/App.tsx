@@ -8,9 +8,10 @@ import {
   Route,
 } from "react-router-dom";
 
-import { LoginToken } from "./utility/utility.tsx";
+import { LoginToken } from "./utility/interface.tsx";
 import LoginPage from "./page/LoginPage.tsx";
 import WorkingPage from "./page/WorkingPage.tsx";
+import AdminConsolePage from "./page/AdminConsolePage.tsx";
 
 // State:
 // userLoginToken changes over time, and it's from backend, so it's
@@ -58,6 +59,15 @@ function App() {
               onChangeToken={setUserLoginToken}
             />
           } 
+        />
+        <Route
+          path="admin"
+          element={
+            <AdminConsolePage 
+              token={userLoginToken}
+              onChangeToken={setUserLoginToken}
+            />
+          }
         />
       </Routes>
     </Router>

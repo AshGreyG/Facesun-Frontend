@@ -3,11 +3,6 @@ export const backendURL: string = "http://127.0.0.1:5000";
 export const PAGINATION_RECORDS_NUM: number = 10;
 export const ADMIN_USER_ID: string = "1";
 
-export interface LoginToken {
-  JWTAccessToken: string;
-  JWTRefreshToken: string;
-}
-
 export function getCurrentTime(): string {
   const now = new Date();
   return `${now.getFullYear()}`

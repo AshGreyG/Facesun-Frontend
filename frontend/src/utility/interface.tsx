@@ -1,3 +1,8 @@
+export interface LoginToken {
+  JWTAccessToken: string;
+  JWTRefreshToken: string;
+}
+
 export interface RawCaseInfo {
   add_user_id: number;
   case_id: string;
@@ -16,14 +21,14 @@ export interface CaseInfo {
 };
 
 export interface RawUserInfo {
-  default_phone?: string | null;
+  default_phone: string | null;
   id: number;
   is_admin: boolean;
   username: string;
 }
 
 export interface UserInfo {
-  defaultPhoneNumber?: string | null;
+  defaultPhoneNumber: string | null;
   userID: number;
   isAdmin: boolean;
   userName: string;

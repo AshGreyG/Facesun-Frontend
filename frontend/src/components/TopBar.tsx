@@ -1,6 +1,7 @@
 import React from "react";
 import Icon from "@mdi/react"
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 
 import { 
   mdiTranslate,
@@ -19,6 +20,7 @@ function TopBar({
   message,
 }: TopBarPropType) {
   const { i18n } = useTranslation();
+  const navigate = useNavigate();
 
   function handleSwitchLanguage() {
     if (i18n.language === "en") {
@@ -29,7 +31,7 @@ function TopBar({
   };
 
   function handleNavigateAdminConsole() {
-
+    navigate("/admin");
   }
 
   return (

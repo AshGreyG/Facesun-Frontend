@@ -31,17 +31,18 @@ import {
   PAGINATION_RECORDS_NUM,
   backendURL,
   getCurrentTime,
-  LoginToken,
 } from "../utility/utility.tsx";
 
 import {
+  LoginToken,
   CaseInfo,
   RefreshTokenResponseData,
   GetCasesResponseData,
   RawGetCurrentUserResponseData,
   UserInfo,
   ErrorResponse,
-  AdminGetUserListResponseData
+  AdminGetUserListResponseData,
+  AddCaseResponseData
 } from "../utility/interface.tsx";
 
 // State :
@@ -114,7 +115,10 @@ function AddingCaseModal({
           </button>
         </div>
         <div className="confirm-button-container">
-          <button onClick={() => handleAddCase(caseIDInput, caseNameInput)}>
+          <button onClick={() => {
+            handleAddCase(caseIDInput, caseNameInput);
+            onCloseSignal();
+          }}>
             {t("confirmButton")}
           </button>
         </div>
@@ -177,6 +181,7 @@ function CaseRow({
 interface CasesTableToolbarPropType {
   onAddCase: (addedCase: CaseInfo) => void;
   checkCaseIDRepeated: (caseID: string) => boolean;
+  userInfo: UserInfo;
 }
 
 type AddingCaseError = 
@@ -197,7 +202,8 @@ type AddingCaseError =
  */
 function CasesTableToolbar({
   onAddCase,
-  checkCaseIDRepeated
+  checkCaseIDRepeated,
+  userInfo
 }: CasesTableToolbarPropType) {
 
   const { t } = useTranslation();
@@ -220,7 +226,7 @@ function CasesTableToolbar({
     onAddCase({
       caseID: caseID,
       caseName: caseName,
-      addUserID: 0,
+      addUserID: userInfo.userID,
       clueCount: 0
     });
     
@@ -309,7 +315,7 @@ function CasesTable({
           <th scope="col" key={1}>{t("caseID")}</th>
           <th scope="col" key={2}>{t("caseName")}</th>
           <th scope="col" key={3}>{t("clueCount")}</th>
-          <th scope="col" key={4}>{t("addUserID")}</th>
+          <th scope="col" key={4}>{t("addUserName")}</th>
           <th scope="col" key={5}>{t("editButtons")}</th>
         </tr>
       </thead>
@@ -331,13 +337,15 @@ interface CasesTableContainerPropType {
   onAddCase: (addedCase: CaseInfo) => void;
   checkCaseIDRepeated: (caseID: string) => boolean;
   usersList: Map<number, string>;
+  userInfo: UserInfo;
 }
 
 function CasesTableContainer({
   casesData,
   onAddCase,
   checkCaseIDRepeated,
-  usersList
+  usersList,
+  userInfo
 }: CasesTableContainerPropType) {
 
   return (
@@ -345,6 +353,7 @@ function CasesTableContainer({
       <CasesTableToolbar 
         onAddCase={onAddCase} 
         checkCaseIDRepeated={checkCaseIDRepeated}
+        userInfo={userInfo}
       />
       <CasesTable 
         casesData={casesData} 
@@ -379,7 +388,7 @@ type QueryFieldType =
   | "CaseName"
   | "AddUserID";
 
-type WorkingPageLoadingError =
+type WorkingPageError =
   | "RefreshTokenOutdatedError"
   | "GetCasesUnknownError"
   | "GetCurrentUserUnknownError"
@@ -417,7 +426,7 @@ function WorkingPage({
   const [casesData, setCasesData] = useState<CaseInfo[]>([]);
   const [userClickedCaseID, setUserClickedCaseID] = useState<string | null>(null);
   const [paginationIndex, setPaginationIndex] = useState<number>(1);
-  const [workingPageError, setWorkingPageError] = useState<WorkingPageLoadingError>(null);
+  const [workingPageError, setWorkingPageError] = useState<WorkingPageError>(null);
 
   const totalPaginationCount = useRef<number>(1);
 
@@ -427,7 +436,7 @@ function WorkingPage({
         "case_id":    addedCase.caseID,
         "case_name":  addedCase.caseName
       })
-      .then((response) => {
+      .then((response: AxiosResponse<AddCaseResponseData, any>) => {
         console.log(response.data);
       });
 
@@ -553,6 +562,12 @@ function WorkingPage({
             onAddCase={handleAddCase}
             checkCaseIDRepeated={checkCaseIDRepeated}
             usersList={usersInfoMap.current}
+            userInfo={userInfo.current ? userInfo.current : {
+              defaultPhoneNumber: null,
+              userID: -1,
+              userName: "",
+              isAdmin: false,
+            }}
           />
         ) : (
           <CluesTableContainer casesData={casesData} />

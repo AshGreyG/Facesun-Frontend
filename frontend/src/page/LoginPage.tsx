@@ -11,10 +11,10 @@ import AnimatedLabel from "../components/AnimatedLabel.tsx";
 import { 
   backendURL,
   getCurrentTime,
-  LoginToken
 } from "../utility/utility.tsx";
 
 import { 
+  LoginToken,
   LoginTokenResponseData,
   ErrorResponse
 } from "../utility/interface.tsx";
