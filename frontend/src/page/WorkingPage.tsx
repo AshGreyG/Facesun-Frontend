@@ -10,7 +10,7 @@ import axios, {
 } from "axios";
 
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { UNSAFE_useScrollRestoration, useNavigate } from "react-router-dom";
 import Icon from "@mdi/react";
 
 import { 
@@ -40,7 +40,8 @@ import {
   GetCasesResponseData,
   RawGetCurrentUserResponseData,
   UserInfo,
-  ErrorResponse
+  ErrorResponse,
+  AdminGetUserListResponseData
 } from "../utility/interface.tsx";
 
 // State :
@@ -124,15 +125,19 @@ function AddingCaseModal({
 
 interface CaseRowPropType {
   caseRow: CaseInfo;
+  usersList: Map<number, string>;
 }
 
-function CaseRow({ caseRow }: CaseRowPropType) {
+function CaseRow({ 
+  caseRow,
+  usersList
+}: CaseRowPropType) {
   return (
     <tr key={caseRow.caseID}>
       <th scope="col" key={1}>{caseRow.caseID}</th>
       <th scope="col" key={2}>{caseRow.caseName}</th>
       <th scope="col" key={3}>{caseRow.clueCount}</th>
-      <th scope="col" key={4}>{caseRow.addUserID}</th>
+      <th scope="col" key={4}>{usersList.get(caseRow.addUserID)}</th>
       <th scope="col" key={5}>
         <div className="buttons-container">
           <div className="edit-button-container">
@@ -215,7 +220,7 @@ function CasesTableToolbar({
     onAddCase({
       caseID: caseID,
       caseName: caseName,
-      addUserID: "",
+      addUserID: 0,
       clueCount: 0
     });
     
@@ -289,10 +294,12 @@ function CasesTableToolbar({
 
 interface CasesTablePropType {
   casesData: CaseInfo[];
+  usersList: Map<number, string>;
 }
 
 function CasesTable({
-  casesData
+  casesData,
+  usersList
 }: CasesTablePropType) {
   const { t } = useTranslation();
   return (
@@ -308,7 +315,11 @@ function CasesTable({
       </thead>
       <tbody>
         {casesData.map((caseRow) => {
-          return <CaseRow caseRow={caseRow} key={caseRow.caseID} />
+          return <CaseRow 
+            caseRow={caseRow} 
+            usersList={usersList}
+            key={caseRow.caseID} 
+          />
         })}
       </tbody>
     </table>
@@ -319,12 +330,14 @@ interface CasesTableContainerPropType {
   casesData: CaseInfo[];
   onAddCase: (addedCase: CaseInfo) => void;
   checkCaseIDRepeated: (caseID: string) => boolean;
+  usersList: Map<number, string>;
 }
 
 function CasesTableContainer({
   casesData,
   onAddCase,
-  checkCaseIDRepeated
+  checkCaseIDRepeated,
+  usersList
 }: CasesTableContainerPropType) {
 
   return (
@@ -333,7 +346,10 @@ function CasesTableContainer({
         onAddCase={onAddCase} 
         checkCaseIDRepeated={checkCaseIDRepeated}
       />
-      <CasesTable casesData={casesData} />
+      <CasesTable 
+        casesData={casesData} 
+        usersList={usersList}
+      />
     </div>
   );
 }
@@ -367,6 +383,7 @@ type WorkingPageLoadingError =
   | "RefreshTokenOutdatedError"
   | "GetCasesUnknownError"
   | "GetCurrentUserUnknownError"
+  | "AdminGetUsersListError"
   | null;
 
 function WorkingPage({
@@ -392,6 +409,7 @@ function WorkingPage({
   }));
 
   const userInfo = useRef<UserInfo | null>(null);
+  const usersInfoMap = useRef<Map<number, string>>(new Map());
 
   const navigate = useNavigate();
 
@@ -490,16 +508,32 @@ function WorkingPage({
           defaultPhoneNumber: response.data.data.users.default_phone,
           userID:             response.data.data.users.id,
           isAdmin:            response.data.data.users.is_admin,
-          userName:           response.data.data.users.username,
-        } as UserInfo;
+          userName:           response.data.data.users.username
+        };
       })
       .catch((error: ErrorResponse) => {
         setWorkingPageError("GetCurrentUserUnknownError");
 
         // We have refreshed token in getting cases process, if there is still a
         // 401 error, it's unnecessary to refresh token again.
-      })
+      });
 
+    // For 'useRef' the RefObject will not be changed before the next render.
+    // So in this 'useEffect' function, if we use the 'userInfo.isAdmin' to
+    // decide whether to get the users list, we will never get the right answer!
+
+    workingAPI.current
+      .get("/manager/admin/users")
+      .then((response: AxiosResponse<AdminGetUserListResponseData, any>) => {
+        response.data.data.users.forEach((user) => {
+          usersInfoMap.current.set(user.id, user.username);
+
+          // In working page, we only need to get the k-v Map for users' info.
+        });
+      })
+      .catch((error: ErrorResponse) => {
+        setWorkingPageError("AdminGetUsersListError");
+      });
 
   }, []);
 
@@ -518,6 +552,7 @@ function WorkingPage({
             casesData={casesData}
             onAddCase={handleAddCase}
             checkCaseIDRepeated={checkCaseIDRepeated}
+            usersList={usersInfoMap.current}
           />
         ) : (
           <CluesTableContainer casesData={casesData} />
@@ -533,6 +568,8 @@ function WorkingPage({
             ? t("workingPageLoadingGetCasesUnknownError")
             :   workingPageError === "GetCurrentUserUnknownError"
             ? t("workingPageLoadingGetCurrentUserUnknownError")
+            :  (workingPageError === "AdminGetUsersListError" && userInfo.current?.isAdmin)
+            ? t("workingPageAdminGetUserListError")
             : t("workingPageLoadingUnknownError"))
           }
           onCloseSignal={() => setWorkingPageError(null)}

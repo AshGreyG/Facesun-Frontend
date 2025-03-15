@@ -1,5 +1,5 @@
 export interface RawCaseInfo {
-  add_user_id: string;
+  add_user_id: number;
   case_id: string;
   case_name: string;
   clue_count: number;
@@ -9,11 +9,25 @@ export interface RawCaseInfo {
 // So I will process it using Array method 'map'
 
 export interface CaseInfo {
-  addUserID: string;
+  addUserID: number;
   caseID: string;
   caseName: string;
   clueCount: number;
 };
+
+export interface RawUserInfo {
+  default_phone?: string | null;
+  id: number;
+  is_admin: boolean;
+  username: string;
+}
+
+export interface UserInfo {
+  defaultPhoneNumber?: string | null;
+  userID: number;
+  isAdmin: boolean;
+  userName: string;
+}
 
 export interface LoginTokenResponseData {
   access_token: string;
@@ -31,21 +45,16 @@ export interface GetCasesResponseData {
 
 export interface RawGetCurrentUserResponseData {
   data: {
-    users: {
-      default_phone: string | null;
-      id: number;
-      is_admin: boolean;
-      username: string;
-    }
-  }
+    users: RawUserInfo;
+  };
   message: string;
 }
 
-export interface UserInfo {
-  defaultPhoneNumber?: string | null;
-  userID: number;
-  isAdmin: boolean;
-  userName: string;
+export interface AdminGetUserListResponseData {
+  data: {
+    users: RawUserInfo[];
+  };
+  message: string;
 }
 
 export interface AddCaseResponseData {
