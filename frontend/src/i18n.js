@@ -29,7 +29,7 @@ const languageResources = {
       "caseID": "Case ID",
       "caseName": "Case Name",
       "clueCount": "Clue Count",
-      "addUserID": "Add User ID",
+      "addUserID": "Add User Name",
       "editButtons": "Edit",
       "addingCaseModalTitle": "Add Case",
       "addingCaseModalCaseIDInputPlaceholder": "Case ID",
@@ -45,6 +45,7 @@ const languageResources = {
       "workingPageLoadingRefreshTokenOutdatedError": "Your refresh token has been outdated, the page will navigate to login page automatically in 3s",
       "workingPageLoadingGetCasesUnknownError": "Unknown error occurs when getting cases",
       "workingPageLoadingGetCurrentUserUnknownError": "Unknown error occurs when getting current user info",
+      "workingPageAdminGetUsersListError": "Error occurs when admin getting users info list",
       "workingPageLoadingUnknownError": "Unknown error occurs"
     }
   },
@@ -58,7 +59,7 @@ const languageResources = {
 
       // Login Page Translation
 
-      "workingPageName": "案件线索编辑",
+      "workingPageName": "案件与线索编辑",
       "loginPage": "登录",
       "loginUsername": "用户名",
       "loginPassword": "密码",
@@ -91,6 +92,7 @@ const languageResources = {
       "workingPageLoadingRefreshTokenOutdatedError": "您的 refresh token 已过期，将在 3 秒内自动跳回登录页面",
       "workingPageLoadingGetCasesUnknownError": "在获取案件列表时发生未知错误",
       "workingPageLoadingGetCurrentUserUnknownError": "在获取用户信息时发生未知错误",
+      "workingPageAdminGetUsersListError": "管理员在获取用户列表时出现错误",
       "workingPageLoadingUnknownError": "未知错误"
     }
   }

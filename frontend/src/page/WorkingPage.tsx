@@ -10,7 +10,7 @@ import axios, {
 } from "axios";
 
 import { useTranslation } from "react-i18next";
-import { UNSAFE_useScrollRestoration, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Icon from "@mdi/react";
 
 import { 
@@ -569,7 +569,7 @@ function WorkingPage({
             :   workingPageError === "GetCurrentUserUnknownError"
             ? t("workingPageLoadingGetCurrentUserUnknownError")
             :  (workingPageError === "AdminGetUsersListError" && userInfo.current?.isAdmin)
-            ? t("workingPageAdminGetUserListError")
+            ? t("workingPageAdminGetUsersListError")
             : t("workingPageLoadingUnknownError"))
           }
           onCloseSignal={() => setWorkingPageError(null)}
