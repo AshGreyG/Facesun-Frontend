@@ -1,0 +1,14 @@
+@import url(../utility/global.css);
+
+.admin-console-page {
+  background-color: var(--main-background-color);
+  color: var(--font-color);
+  display: flex;
+  width: 100vw;
+  min-height: 100vh;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: auto;
+  margin: 0;
+}

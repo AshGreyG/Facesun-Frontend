@@ -46,7 +46,11 @@ const languageResources = {
       "workingPageLoadingGetCasesUnknownError": "Unknown error occurs when getting cases",
       "workingPageLoadingGetCurrentUserUnknownError": "Unknown error occurs when getting current user info",
       "workingPageAdminGetUsersListError": "Error occurs when admin getting users info list",
-      "workingPageLoadingUnknownError": "Unknown error occurs"
+      "workingPageLoadingUnknownError": "Unknown error occurs",
+
+      // Admin Console Page Translation
+
+      "adminConsolePageName": "Manage Accounts"
     }
   },
   zh: {
@@ -93,7 +97,11 @@ const languageResources = {
       "workingPageLoadingGetCasesUnknownError": "在获取案件列表时发生未知错误",
       "workingPageLoadingGetCurrentUserUnknownError": "在获取用户信息时发生未知错误",
       "workingPageAdminGetUsersListError": "管理员在获取用户列表时出现错误",
-      "workingPageLoadingUnknownError": "未知错误"
+      "workingPageLoadingUnknownError": "未知错误",
+
+      // Admin Console Page Translation
+
+      "adminConsolePageName": "账户管理"
     }
   }
 };

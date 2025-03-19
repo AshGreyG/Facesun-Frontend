@@ -31,7 +31,18 @@ export interface UserInfo {
   defaultPhoneNumber: string | null;
   userID: number;
   isAdmin: boolean;
-  userName: string;
+  username: string;
+}
+
+export interface AddUserInfo {
+  username: string;
+  password: string;
+}
+
+export interface ResetPasswordInfo {
+  userID: number;
+  newPassword: string;
+  confirmNewPassword: string;
 }
 
 export interface LoginTokenResponseData {

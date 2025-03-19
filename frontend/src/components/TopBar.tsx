@@ -13,11 +13,13 @@ import "./TopBar.css"
 interface TopBarPropType {
   isAdmin?: boolean;
   message?: string;
+  isDisabled?: boolean;
 }
 
 function TopBar({ 
   isAdmin,
   message,
+  isDisabled
 }: TopBarPropType) {
   const { i18n } = useTranslation();
   const navigate = useNavigate();
@@ -56,6 +58,7 @@ function TopBar({
             <button
               className="admin-console-button top-bar-button"
               onClick={handleNavigateAdminConsole}
+              disabled={isDisabled}
             >
               <Icon
                 path={mdiShieldAccount}

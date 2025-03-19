@@ -207,7 +207,7 @@ function CasesTableToolbar({
 }: CasesTableToolbarPropType) {
 
   const { t } = useTranslation();
-  const [isShowingAddingCaseModal, setIsShowingAddingCaseModal] = useState<boolean>(false);
+  const [isEditingCase, setIsEditingCase] = useState<boolean>(false);
   const [addingCaseError, setAddingCaseError] = useState<AddingCaseError>(null);
 
   function handleAddCase(caseID: string, caseName: string) {
@@ -251,7 +251,7 @@ function CasesTableToolbar({
         <div className="add-case-button-container">
           <button
             className="add-case-button"
-            onClick={() => setIsShowingAddingCaseModal(true)}
+            onClick={() => setIsEditingCase(true)}
           >
             <Icon
               path={mdiPlus}
@@ -268,11 +268,11 @@ function CasesTableToolbar({
           </button>
         </div>
       </div>
-      {isShowingAddingCaseModal && (
+      {isEditingCase && (
         <AddingCaseModal
           message={t("addingCaseModalTitle")}
           handleAddCase={handleAddCase}
-          onCloseSignal={() => setIsShowingAddingCaseModal(false)}
+          onCloseSignal={() => setIsEditingCase(false)}
         />
       )}
       {addingCaseError && (
@@ -517,7 +517,7 @@ function WorkingPage({
           defaultPhoneNumber: response.data.data.users.default_phone,
           userID:             response.data.data.users.id,
           isAdmin:            response.data.data.users.is_admin,
-          userName:           response.data.data.users.username
+          username:           response.data.data.users.username
         };
       })
       .catch((error: ErrorResponse) => {
@@ -565,7 +565,7 @@ function WorkingPage({
             userInfo={userInfo.current ? userInfo.current : {
               defaultPhoneNumber: null,
               userID: -1,
-              userName: "",
+              username: "",
               isAdmin: false,
             }}
           />
