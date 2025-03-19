@@ -12,3 +12,101 @@
   overflow: auto;
   margin: 0;
 }
+
+.admin-console-container {
+  background-color: var(--container-background-color);
+  margin-top: 120px;
+  margin-bottom: 60px;
+  padding: 20px 40px;
+  border-radius: var(--panel-border-radius);
+  width: 80vw;
+  min-height: 70%;
+}
+
+.users-table-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: auto;
+  margin-bottom: 30px;
+}
+
+.users-table-container table {
+  margin-top: 20px;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.users-table-container table thead tr th {
+  background-color: var(--table-head-background-color);
+  font-size: 1.25em;
+  font-weight: 600;
+  padding: 16px 16px;
+  overflow-x: auto;
+}
+
+.users-table-container table > tbody > tr > th {
+  padding: 8px 16px;
+  font-weight: 500;
+}
+
+.users-table-container table > thead > tr > th:first-of-type {
+  border-top-left-radius: var(--panel-border-radius);
+  border-left:    1px solid var(--table-border-color);
+  border-right:   1px solid var(--table-border-color);
+  border-bottom:  1px solid var(--table-border-color);
+  border-top:     1px solid var(--table-border-color);
+}
+
+.users-table-container table > thead > tr > th:not(:first-of-type) {
+  border-right:   1px solid var(--table-border-color);
+  border-bottom:  1px solid var(--table-border-color);
+  border-top:     1px solid var(--table-border-color);
+}
+
+.users-table-container table > thead > tr > th:last-of-type {
+  border-top-right-radius: var(--panel-border-radius);
+}
+
+.users-table-container table > tbody > tr:last-of-type > th:first-of-type {
+  border-bottom-left-radius: var(--panel-border-radius);
+}
+
+.users-table-container table > tbody > tr:last-of-type > th:last-of-type {
+  border-bottom-right-radius: var(--panel-border-radius);
+}
+
+.users-table-container table > tbody > tr > th:first-of-type {
+  border-left:    1px solid var(--table-border-color);
+  border-right:   1px solid var(--table-border-color);
+  border-bottom:  1px solid var(--table-border-color);
+}
+
+.users-table-container table > tbody > tr > th:not(:first-of-type) {
+  border-bottom:  1px solid var(--table-border-color);
+  border-right:   1px solid var(--table-border-color);
+}
+
+.users-table .buttons-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.users-table .buttons-container button {
+  height: 20px;
+  width: 20px;
+  border-radius: 10px;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.users-table .buttons-container button:hover {
+  background-color: var(--_hover-icon-color);
+}

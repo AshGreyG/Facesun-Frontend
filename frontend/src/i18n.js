@@ -50,7 +50,10 @@ const languageResources = {
 
       // Admin Console Page Translation
 
-      "adminConsolePageName": "Manage Accounts"
+      "adminConsolePageName": "Manage Accounts",
+      "userID": "User ID",
+      "userName": "Username",
+      "phoneNumber": "Tel."
     }
   },
   zh: {
@@ -101,7 +104,10 @@ const languageResources = {
 
       // Admin Console Page Translation
 
-      "adminConsolePageName": "账户管理"
+      "adminConsolePageName": "账户管理",
+      "userID": "用户编号",
+      "userName": "用户名",
+      "phoneNumber": "联系电话"
     }
   }
 };

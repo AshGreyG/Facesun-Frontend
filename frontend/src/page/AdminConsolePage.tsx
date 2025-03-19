@@ -156,13 +156,12 @@ function UsersTableContainer({ usersList }: UsersTableContainerPropType) {
 
   return (
     <div className="users-table-container">
-
-    <UsersTableToolbar
-      onAddUser={handleAddUser}
-      onResetPassword={handleResetPassword}
-      onDeleteUser={handleDeleteUser}
-    />
-    <UsersTable usersList={usersList}/>
+      <UsersTableToolbar
+        onAddUser={handleAddUser}
+        onResetPassword={handleResetPassword}
+        onDeleteUser={handleDeleteUser}
+      />
+      <UsersTable usersList={usersList} />
     </div>
   )
 }
@@ -237,7 +236,7 @@ function AdminConsolePage({
               setTimeout(() => {
                 setAdminConsolePageError(null);
                 navigate("/login");
-              })
+              }, 3000);
             });
         } else {
           setAdminConsolePageError("AdminGetUsersListError");
