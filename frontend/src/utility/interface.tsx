@@ -34,17 +34,6 @@ export interface UserInfo {
   username: string;
 }
 
-export interface AddUserInfo {
-  username: string;
-  password: string;
-}
-
-export interface ResetPasswordInfo {
-  userID: number;
-  newPassword: string;
-  confirmNewPassword: string;
-}
-
 export interface LoginTokenResponseData {
   access_token: string;
   refresh_token: string;

@@ -53,7 +53,10 @@ const languageResources = {
       "adminConsolePageName": "Manage Accounts",
       "userID": "User ID",
       "userName": "Username",
-      "phoneNumber": "Tel."
+      "phoneNumber": "Tel.",
+      "addingUserUsernameInputPlaceholder": "Username",
+      "addingUserPasswordInputPlaceholder": "Password",
+      "addingUserConfirmInputPlaceholder": "Confirm Your Password"
     }
   },
   zh: {

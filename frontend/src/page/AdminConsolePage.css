@@ -88,6 +88,76 @@
   border-right:   1px solid var(--table-border-color);
 }
 
+.button-container {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  padding: var(--input-padding) 0;
+}
+
+.active .cancel-button-container {
+  flex: 1;
+  float: left;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.active .cancel-button-container button {
+  padding: 
+    var(--cancel-or-confirm-button-padding-top-bottom)
+    var(--cancel-or-confirm-button-padding-left-right);
+  color: var(--link-color);
+  background-color: var(--cancel-button-background-color);
+  cursor: pointer;
+  border: 1px solid var(--cancel-button-border-color);
+  border-radius: var(--cancel-or-confirm-button-border-radius);
+  transition: 
+    background-color 0.3s ease-out,
+    box-shadow 0.3s ease-out;
+}
+
+.active .confirm-button-container {
+  flex: 1;
+  float: right;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.active .confirm-button-container button {
+  padding: 
+    var(--cancel-or-confirm-button-padding-top-bottom)
+    var(--cancel-or-confirm-button-padding-left-right);
+  color: var(--link-color);
+  background-color: var(--confirm-button-background-color);
+  cursor: pointer;
+  border: 1px solid var(--confirm-button-background-color);
+  border-radius: var(--cancel-or-confirm-button-border-radius);
+  transition: 
+    border-color 0.3s ease-out,
+    background-color 0.3s ease-out,
+    box-shadow 0.3s ease-out;
+}
+
+.active .confirm-button-container button:hover {
+  background-color: var(--_hover-confirm-button-background-color);
+  border: 1px solid var(--_hover-confirm-button-background-color);
+  box-shadow: 2px 2px 2px var(--shadow-opacity-color);
+}
+
+.active .cancel-button-container button:hover {
+  background-color: var(--_hover-cancel-button-background-color);
+  box-shadow: 2px 2px 2px var(--shadow-opacity-color);
+}
+
+.abstract-modal-background:not(.active) .confirm-button-container button,
+.abstract-modal-background:not(.active) .cancel-button-container button {
+  opacity: 0;
+}
+
 .users-table .buttons-container {
   display: flex;
   justify-content: center;
@@ -109,4 +179,45 @@
 
 .users-table .buttons-container button:hover {
   background-color: var(--_hover-icon-color);
+}
+
+.users-list-toolbar {
+  height: 60px;
+}
+
+.users-list-toolbar .button-components {
+  float: right;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.users-list-toolbar .button-components button {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  background-color: transparent;
+  border: none;
+  height: 30px;
+  width: 30px;
+  border-radius: 15px;
+  transition: background-color 0.15s ease-in;
+}
+
+.users-list-toolbar .button-components button:hover {
+  background-color: var(--_hover-icon-color);
+}
+
+.users-list-toolbar .query-form-container {
+  height: 100%;
+  float: left;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }

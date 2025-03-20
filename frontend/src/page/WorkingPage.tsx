@@ -71,8 +71,13 @@ interface AddingCaseModalPropType {
  * event handlers related to them vary from different states and states set 
  * functions.
  * @param {AddingCaseModalPropType} param0
- * @param {string} message
- * 
+ * @param {string} param0.message This is passed to the base component `AbstractModal`
+ * @param {Function} param0.handleAddCase This function handles adding case, and it's
+ * passed from the parent component.
+ * @param {Function} param0.onCloseSignal This function is passes to the base 
+ * component `AbstractModal`, it handles closing the modal (usually this function is
+ * implemented by parent component, because the parent component manages the state
+ * of showing this modal).
  */
 function AddingCaseModal({ 
   message,
@@ -207,7 +212,7 @@ function CasesTableToolbar({
 }: CasesTableToolbarPropType) {
 
   const { t } = useTranslation();
-  const [isEditingCase, setIsEditingCase] = useState<boolean>(false);
+  const [isAddingCase, setIsAddingCase] = useState<boolean>(false);
   const [addingCaseError, setAddingCaseError] = useState<AddingCaseError>(null);
 
   function handleAddCase(caseID: string, caseName: string) {
@@ -251,7 +256,7 @@ function CasesTableToolbar({
         <div className="add-case-button-container">
           <button
             className="add-case-button"
-            onClick={() => setIsEditingCase(true)}
+            onClick={() => setIsAddingCase(true)}
           >
             <Icon
               path={mdiPlus}
@@ -268,11 +273,11 @@ function CasesTableToolbar({
           </button>
         </div>
       </div>
-      {isEditingCase && (
+      {isAddingCase && (
         <AddingCaseModal
           message={t("addingCaseModalTitle")}
           handleAddCase={handleAddCase}
-          onCloseSignal={() => setIsEditingCase(false)}
+          onCloseSignal={() => setIsAddingCase(false)}
         />
       )}
       {addingCaseError && (
