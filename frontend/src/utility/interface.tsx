@@ -62,9 +62,12 @@ export interface AdminGetUserListResponseData {
   message: string;
 }
 
-export interface AddCaseResponseData {
+interface BasicResponseData {
   message: string;
 }
+
+export interface AddCaseResponseData extends BasicResponseData {}
+export interface DeleteCaseResponseData extends BasicResponseData {}
 
 export interface ErrorResponse {
   response: {

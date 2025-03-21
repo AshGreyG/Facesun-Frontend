@@ -42,7 +42,8 @@ import {
   UserInfo,
   ErrorResponse,
   AdminGetUserListResponseData,
-  AddCaseResponseData
+  AddCaseResponseData,
+  DeleteCaseResponseData
 } from "../utility/interface.tsx";
 
 // State :
@@ -58,9 +59,26 @@ import {
 //        + "AddUserID"
 //   3. casesData, this is the core data of Cases. 
 
+/**
+ * This is the interface of `AddingCaseModal` component props
+ * @interface
+ */
 interface AddingCaseModalPropType {
+  /**
+   * `message` is passed to the `@see {AbstractModal}` component
+   * @type {string}
+   */
   message: string;
-  handleAddCase: (caseID: string, caseName: string) => void;
+  /**
+   * `onAddCase` is the function to add the case to cases list and post to the
+   * backend according to `caseIDInput` and `caseNameInput`
+   * @type {(caseID: string, caseName: string) => void}
+   */
+  onAddCase: (caseID: string, caseName: string) => void;
+  /**
+   * 'onCloseSignal` is passed to the `@see {AbstractModal}` component
+   * @type {() => void}
+   */
   onCloseSignal: () => void;
 }
 
@@ -72,16 +90,16 @@ interface AddingCaseModalPropType {
  * functions.
  * @param {AddingCaseModalPropType} param0
  * @param {string} param0.message This is passed to the base component `AbstractModal`
- * @param {Function} param0.handleAddCase This function handles adding case, and it's
- * passed from the parent component.
- * @param {Function} param0.onCloseSignal This function is passes to the base 
+ * @param {(caseID: string, caseName: string) => void} param0.onAddCase This 
+ * function handles adding case, and it's passed from the parent component.
+ * @param {() => void} param0.onCloseSignal This function is passes to the base 
  * component `AbstractModal`, it handles closing the modal (usually this function is
  * implemented by parent component, because the parent component manages the state
  * of showing this modal).
  */
 function AddingCaseModal({ 
   message,
-  handleAddCase,
+  onAddCase,
   onCloseSignal
 }: AddingCaseModalPropType) {
   const { t } = useTranslation();
@@ -121,7 +139,7 @@ function AddingCaseModal({
         </div>
         <div className="confirm-button-container">
           <button onClick={() => {
-            handleAddCase(caseIDInput, caseNameInput);
+            onAddCase(caseIDInput, caseNameInput);
             onCloseSignal();
           }}>
             {t("confirmButton")}
@@ -132,15 +150,28 @@ function AddingCaseModal({
   );
 }
 
+interface EditingCaseModalPropType {
+
+}
+
+function EditingCaseModal() {
+
+}
+
 interface CaseRowPropType {
   caseRow: CaseInfo;
   usersList: Map<number, string>;
+  onDeleteCase: (caseID: string) => void;
 }
 
 function CaseRow({ 
   caseRow,
-  usersList
+  usersList,
+  onDeleteCase
 }: CaseRowPropType) {
+  const { t } = useTranslation();
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
+
   return (
     <tr key={caseRow.caseID}>
       <th scope="col" key={1}>{caseRow.caseID}</th>
@@ -170,7 +201,13 @@ function CaseRow({
             </button>
           </div>
           <div className="delete-button-container">
-            <button className="delete-case">
+            <button 
+              className="delete-case"
+              onClick={() => {
+                setIsDeleting(true);
+                onDeleteCase(caseRow.caseID);
+              }}
+            >
               <Icon 
                 path={mdiTrashCanOutline}
                 size={0.6}
@@ -200,8 +237,8 @@ type AddingCaseError =
 
 /**
  * @description `CasesTableToolbar` includes those functions: 
- * - Use a `TextFieldInput` to query the corresponding records;
- * - Use a button to add case, and there will be a @see {AddingCaseModal}
+ * + Use a `TextFieldInput` to query the corresponding records;
+ * + Use a button to add case, and there will be a `@see {AddingCaseModal}`
  *   `AddingCaseModal` to input the caseID and caseName
  * 
  */
@@ -215,7 +252,16 @@ function CasesTableToolbar({
   const [isAddingCase, setIsAddingCase] = useState<boolean>(false);
   const [addingCaseError, setAddingCaseError] = useState<AddingCaseError>(null);
 
-  function handleAddCase(caseID: string, caseName: string) {
+  /**
+   * @description This function is to check if the added case is valid. It checks
+   * three possible errors:
+   *   + One of `caseID` and `caseName` is empty, or both are empty;
+   *   + The format of `caseID` is not correct, which should be `A` plus 22 0 ~ 9 digits
+   *   + The `caseID` is duplicate with existing ID.
+   * @param {string} caseID Passed from `caseIDInput`
+   * @param {string} caseName Passed from `caseNameInput`
+   */
+  function checkAddCase(caseID: string, caseName: string) {
     if (caseID === "" || caseName === "") {
       setAddingCaseError("EmptyInputError");
       return;
@@ -276,7 +322,7 @@ function CasesTableToolbar({
       {isAddingCase && (
         <AddingCaseModal
           message={t("addingCaseModalTitle")}
-          handleAddCase={handleAddCase}
+          onAddCase={checkAddCase}
           onCloseSignal={() => setIsAddingCase(false)}
         />
       )}
@@ -306,11 +352,13 @@ function CasesTableToolbar({
 interface CasesTablePropType {
   casesData: CaseInfo[];
   usersList: Map<number, string>;
+  onDeleteCase: (caseID: string) => void;
 }
 
 function CasesTable({
   casesData,
-  usersList
+  usersList,
+  onDeleteCase
 }: CasesTablePropType) {
   const { t } = useTranslation();
   return (
@@ -329,7 +377,8 @@ function CasesTable({
           return <CaseRow 
             caseRow={caseRow} 
             usersList={usersList}
-            key={caseRow.caseID} 
+            key={caseRow.caseID}
+            onDeleteCase={onDeleteCase}
           />
         })}
       </tbody>
@@ -339,18 +388,20 @@ function CasesTable({
 
 interface CasesTableContainerPropType {
   casesData: CaseInfo[];
-  onAddCase: (addedCase: CaseInfo) => void;
-  checkCaseIDRepeated: (caseID: string) => boolean;
   usersList: Map<number, string>;
   userInfo: UserInfo;
+  onAddCase: (addedCase: CaseInfo) => void;
+  onDeleteCase: (caseID: string) => void;
+  checkCaseIDRepeated: (caseID: string) => boolean;
 }
 
 function CasesTableContainer({
   casesData,
-  onAddCase,
-  checkCaseIDRepeated,
   usersList,
-  userInfo
+  userInfo,
+  onAddCase,
+  onDeleteCase,
+  checkCaseIDRepeated,
 }: CasesTableContainerPropType) {
 
   return (
@@ -363,6 +414,7 @@ function CasesTableContainer({
       <CasesTable 
         casesData={casesData} 
         usersList={usersList}
+        onDeleteCase={onDeleteCase}
       />
     </div>
   );
@@ -466,8 +518,18 @@ function WorkingPage({
 
   }
 
-  function handleDeleteCase() {
-
+  function handleDeleteCase(caseID: string) {
+    workingAPI.current
+      .delete("/cases/case/" + caseID)
+      .then((response: AxiosResponse<DeleteCaseResponseData, any>) => {
+        console.log(response.data.message);
+      });
+    
+    setCasesData(casesData.filter((originalCase) => {
+      if (originalCase.caseID !== caseID) {
+        return originalCase;
+      }
+    }));
   }
 
   function handleChangeCase() {
@@ -564,8 +626,6 @@ function WorkingPage({
         {(userClickedCaseID === null) ? (
           <CasesTableContainer
             casesData={casesData}
-            onAddCase={handleAddCase}
-            checkCaseIDRepeated={checkCaseIDRepeated}
             usersList={usersInfoMap.current}
             userInfo={userInfo.current ? userInfo.current : {
               defaultPhoneNumber: null,
@@ -573,6 +633,9 @@ function WorkingPage({
               username: "",
               isAdmin: false,
             }}
+            onAddCase={handleAddCase}
+            onDeleteCase={handleDeleteCase}
+            checkCaseIDRepeated={checkCaseIDRepeated}
           />
         ) : (
           <CluesTableContainer casesData={casesData} />

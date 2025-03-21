@@ -9,7 +9,7 @@ import { mdiClose } from "@mdi/js";
 import "./AbstractModal.css"
 
 /**
- * This is the interface of AbstractModal component props.
+ * This is the interface of `AbstractModal` component props.
  * @interface
  */
 interface AbstractModalPropType {

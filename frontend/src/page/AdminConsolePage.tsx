@@ -155,7 +155,7 @@ interface UsersTableToolbarPropType {
   onAddUser: (
     addUsername: string,
     addedPassword: string, 
-    confirmPassword: string,
+    confirmPassword: string
   ) => void;
   onResetPassword: (
     userID: number,
