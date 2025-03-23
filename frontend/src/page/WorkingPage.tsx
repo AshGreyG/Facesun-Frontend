@@ -151,7 +151,9 @@ function AddingCaseModal({
 }
 
 interface EditingCaseModalPropType {
-
+  message: string;
+  onChangeCase: (caseID: string, caseName: string) => void;
+  onCloseSignal: () => void;
 }
 
 function EditingCaseModal() {
@@ -482,7 +484,10 @@ function WorkingPage({
   const { t } = useTranslation();
   const [casesData, setCasesData] = useState<CaseInfo[]>([]);
   const [userClickedCaseID, setUserClickedCaseID] = useState<string | null>(null);
+  const [userClickedField, setUserClickedField] = useState<keyof CaseInfo>("caseID");
+  const [isAscending, setIsAscending] = useState<boolean>(true);
   const [paginationIndex, setPaginationIndex] = useState<number>(1);
+  const [filteredCasesData, setFilteredCasesData] = useState<CaseInfo[]>([]);
   const [workingPageError, setWorkingPageError] = useState<WorkingPageError>(null);
 
   const totalPaginationCount = useRef<number>(1);
@@ -497,7 +502,22 @@ function WorkingPage({
         console.log(response.data);
       });
 
-    setCasesData([addedCase, ...casesData]);
+    let newCasesData: CaseInfo[] = [];
+    for (let i: number = 0; i < casesData.length; ++i) {
+      if (
+         isAscending && casesData[i].caseID > addedCase.caseID ||
+        !isAscending && casesData[i].caseID < addedCase.caseID
+      ) { 
+        newCasesData.push(...casesData.slice(0, i));
+        newCasesData.push(addedCase);
+        newCasesData.push(...casesData.slice(i));
+        break;
+      }
+    }
+
+    setCasesData(newCasesData);
+    setFilteredCasesData(newCasesData);
+
     totalPaginationCount.current
       = ((casesData.length - 1) + 1) / PAGINATION_RECORDS_NUM + 1;
     
@@ -548,7 +568,12 @@ function WorkingPage({
             clueCount:  rawCase.clue_count
           };
         });
-        setCasesData(cases);
+        let newCasesData: CaseInfo[] 
+          = isAscending 
+          ? cases.sort((a, b) => 2 * Number(a.caseID > b.caseID) - 1)
+          : cases.sort((a, b) => 2 * Number(a.caseID < b.caseID) - 1);
+        setCasesData(newCasesData);
+        setFilteredCasesData(newCasesData);
         totalPaginationCount.current = (cases.length - 1) / PAGINATION_RECORDS_NUM + 1;
       })
       .catch((error: ErrorResponse) => {
@@ -625,7 +650,7 @@ function WorkingPage({
       <div className="working-container">
         {(userClickedCaseID === null) ? (
           <CasesTableContainer
-            casesData={casesData}
+            casesData={filteredCasesData}
             usersList={usersInfoMap.current}
             userInfo={userInfo.current ? userInfo.current : {
               defaultPhoneNumber: null,
