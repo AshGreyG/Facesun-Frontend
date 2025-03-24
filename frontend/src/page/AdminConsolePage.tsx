@@ -289,13 +289,13 @@ function AdminConsolePage({
   token,
   onChangeToken
 }: AdminConsolePagePropType) {
-  const [usersList, setUsersList] = useState<UserInfo[]>([]);
-  const [adminConsolePageError, setAdminConsolePageError] 
-    = useState<AdminConsolePageError>(null);
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  const workingAPI = useRef<AxiosInstance>(axios.create({
+  const [usersList,                         setUsersList] = useState<UserInfo[]>([]);
+  const [adminConsolePageError, setAdminConsolePageError] = useState<AdminConsolePageError>(null);
+
+   const workingAPI = useRef<AxiosInstance>(axios.create({
     baseURL: backendURL,
     timeout: 5000,
     headers: {

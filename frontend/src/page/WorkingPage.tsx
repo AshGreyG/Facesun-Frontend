@@ -103,7 +103,7 @@ function AddingCaseModal({
   onCloseSignal
 }: AddingCaseModalPropType) {
   const { t } = useTranslation();
-  const [caseIDInput, setCaseIDInput] = useState<string>("");
+  const [caseIDInput,     setCaseIDInput] = useState<string>("");
   const [caseNameInput, setCaseNameInput] = useState<string>("");
 
   return (
@@ -251,7 +251,7 @@ function CasesTableToolbar({
 }: CasesTableToolbarPropType) {
 
   const { t } = useTranslation();
-  const [isAddingCase, setIsAddingCase] = useState<boolean>(false);
+  const [isAddingCase,       setIsAddingCase] = useState<boolean>(false);
   const [addingCaseError, setAddingCaseError] = useState<AddingCaseError>(null);
 
   /**
@@ -482,13 +482,13 @@ function WorkingPage({
   const navigate = useNavigate();
 
   const { t } = useTranslation();
-  const [casesData, setCasesData] = useState<CaseInfo[]>([]);
-  const [userClickedCaseID, setUserClickedCaseID] = useState<string | null>(null);
-  const [userClickedField, setUserClickedField] = useState<keyof CaseInfo>("caseID");
-  const [isAscending, setIsAscending] = useState<boolean>(true);
-  const [paginationIndex, setPaginationIndex] = useState<number>(1);
+  const [casesData,                 setCasesData] = useState<CaseInfo[]>([]);
   const [filteredCasesData, setFilteredCasesData] = useState<CaseInfo[]>([]);
-  const [workingPageError, setWorkingPageError] = useState<WorkingPageError>(null);
+  const [userClickedCaseID, setUserClickedCaseID] = useState<string | null>(null);
+  const [userClickedField,   setUserClickedField] = useState<keyof CaseInfo>("caseID");
+  const [isAscending,             setIsAscending] = useState<boolean>(true);
+  const [paginationIndex,     setPaginationIndex] = useState<number>(1);
+  const [workingPageError,   setWorkingPageError] = useState<WorkingPageError>(null);
 
   const totalPaginationCount = useRef<number>(1);
 
@@ -505,8 +505,8 @@ function WorkingPage({
     let newCasesData: CaseInfo[] = [];
     for (let i: number = 0; i < casesData.length; ++i) {
       if (
-         isAscending && casesData[i].caseID > addedCase.caseID ||
-        !isAscending && casesData[i].caseID < addedCase.caseID
+         isAscending && casesData[i][userClickedField] > addedCase[userClickedField] ||
+        !isAscending && casesData[i][userClickedField] < addedCase[userClickedField]
       ) { 
         newCasesData.push(...casesData.slice(0, i));
         newCasesData.push(addedCase);
@@ -570,8 +570,8 @@ function WorkingPage({
         });
         let newCasesData: CaseInfo[] 
           = isAscending 
-          ? cases.sort((a, b) => 2 * Number(a.caseID > b.caseID) - 1)
-          : cases.sort((a, b) => 2 * Number(a.caseID < b.caseID) - 1);
+          ? cases.sort((a, b) => 2 * Number(a[userClickedField] > b[userClickedField]) - 1)
+          : cases.sort((a, b) => 2 * Number(a[userClickedField] < b[userClickedField]) - 1);
         setCasesData(newCasesData);
         setFilteredCasesData(newCasesData);
         totalPaginationCount.current = (cases.length - 1) / PAGINATION_RECORDS_NUM + 1;
