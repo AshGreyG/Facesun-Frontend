@@ -1,0 +1,14 @@
+@import url(../utility/global.css);
+
+.confirm-modal-container {
+  padding: 0 20px;
+  color: var(--link-color);
+}
+
+.confirm-modal-container .confirm-message {
+  padding: 0 10px;
+}
+
+.confirm-modal-container .button-container {
+  padding: 20px 10px;
+}

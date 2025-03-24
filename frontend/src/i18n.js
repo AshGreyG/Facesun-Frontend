@@ -31,10 +31,16 @@ const languageResources = {
       "clueCount": "Clue Count",
       "addUserName": "Add User Name",
       "editButtons": "Edit",
+
       "addingCaseModalTitle": "Add Case",
       "addingCaseModalCaseIDInputPlaceholder": "Case ID",
       "addingCaseModalCaseNameInputPlaceholder": "Case Name",
       "queryTextInputPlaceholder": "Query for something...",
+
+      "deletingCaseModalTitle": "Delete Case",
+      "deletingCaseModalMessage": "Are you sure to delete this case?",
+
+      "editingCaseModalTitle": "Edit Case",
 
       "addingCaseNetworkError": "Network error occurs, please refresh your web page or check your network",
       "addingCaseIDSyntaxError": "Wrong case ID, please check your case ID and retry later",
@@ -88,10 +94,14 @@ const languageResources = {
       "clueCount": "线索数量",
       "addUserName": "案件添加人",
       "editButtons": "编辑",
+
       "addingCaseModalTitle": "增加案件",
       "addingCaseModalCaseIDInputPlaceholder": "案件编号",
       "addingCaseModalCaseNameInputPlaceholder": "案件名称",
       "queryTextInputPlaceholder": "搜索...",
+
+      "deletingCaseModalTitle": "删除案件",
+      "deletingCaseModalMessage": "你确定要删除这个案件吗？",
 
       "addingCaseNetworkError": "网络错误，请刷新页面或检查您的网络",
       "addingCaseIDSyntaxError": "案件编号错误，请检查案件编号并重试",

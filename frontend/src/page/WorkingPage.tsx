@@ -42,9 +42,9 @@ import {
   UserInfo,
   ErrorResponse,
   AdminGetUserListResponseData,
-  AddCaseResponseData,
-  DeleteCaseResponseData
 } from "../utility/interface.tsx";
+
+import ConfirmModal from "../components/ConfirmModal.tsx";
 
 // State :
 //   1. Is in cases table page or clues table page, this can use 
@@ -150,29 +150,131 @@ function AddingCaseModal({
   );
 }
 
+/**
+ * This is the interface of `EditingCaseModal` component props
+ * @interface
+ */
 interface EditingCaseModalPropType {
+  /**
+   * `message` is passed to the `@see {AbstractModal}` component
+   */
   message: string;
-  onChangeCase: (caseID: string, caseName: string) => void;
+  originalCaseID: string;
+  originalCaseName: string;
+  /**
+   * `onChangeCase` is the function to change the case to cases list and post to the
+   * backend according to `caseIDInput` and `caseNameInput`
+   * @type {(caseID: string, caseName: string) => void}
+   */
+  onChangeCase: (
+    originalCaseID: string,
+    caseID: string, 
+    caseName: string
+  ) => void;
+  /**
+   * 'onCloseSignal` is passed to the `@see {AbstractModal}` component
+   * @type {() => void}
+   */
   onCloseSignal: () => void;
 }
 
-function EditingCaseModal() {
+/**
+ * @description `EditingCaseModal` is similar to `AddingCaseModal`
+ * @param {EditingCaseModalPropType} param0
+ * @param {string} param0.message This is passed to the base component `AbstractModal`
+ * @param {(caseID: string, caseName: string) => void} param0.onAddCase This 
+ * function handles adding case, and it's passed from the parent component.
+ * @param {() => void} param0.onCloseSignal This function is passes to the base 
+ * component `AbstractModal`, it handles closing the modal (usually this function is
+ * implemented by parent component, because the parent component manages the state
+ * of showing this modal).
+ */
+function EditingCaseModal({
+  message,
+  originalCaseID,
+  originalCaseName,
+  onChangeCase,
+  onCloseSignal
+}: EditingCaseModalPropType) {
+  const { t } = useTranslation();
+  const [caseIDInput,     setCaseIDInput] = useState<string>(originalCaseID);
+  const [caseNameInput, setCaseNameInput] = useState<string>(originalCaseName);
 
+  return (
+    <AbstractModal 
+      message={message}
+      onCloseSignal={onCloseSignal}
+    >
+      <div className="case-id-input-container">
+        <TextFieldInput 
+          inputName="case-id-input"
+          placeholder={t("addingCaseModalCaseIDInputPlaceholder")}
+          textInputValue={caseIDInput}
+          onTextInputChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            setCaseIDInput(e.target.value);
+          }}
+        />
+      </div>
+      <div className="case-name-input-container">
+        <TextFieldInput 
+          inputName="case-name-input"
+          placeholder={t("addingCaseModalCaseNameInputPlaceholder")}
+          textInputValue={caseNameInput}
+          onTextInputChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            setCaseNameInput(e.target.value);
+          }}
+        />
+      </div>
+      <div className="button-container">
+        <div className="cancel-button-container">
+          <button onClick={() => onCloseSignal()}>
+            {t("cancelButton")}
+          </button>
+        </div>
+        <div className="confirm-button-container">
+          <button onClick={() => {
+            onChangeCase(originalCaseID, caseIDInput, caseNameInput);
+            onCloseSignal();
+          }}>
+            {t("confirmButton")}
+          </button>
+        </div>
+      </div>
+    </AbstractModal>
+  );
 }
 
 interface CaseRowPropType {
   caseRow: CaseInfo;
   usersList: Map<number, string>;
   onDeleteCase: (caseID: string) => void;
+  onChangeCase: (
+    originalCaseID: string,
+    caseID: string, 
+    caseName: string
+  ) => void;
 }
+
+type EditingCaseError =
+  | "CaseIDSyntaxError"
+  | "CaseIDRepeatedError"
+  | "EmptyInputError"
+  | null;
 
 function CaseRow({ 
   caseRow,
   usersList,
-  onDeleteCase
+  onDeleteCase,
+  onChangeCase
 }: CaseRowPropType) {
   const { t } = useTranslation();
-  const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const [isDeleting,             setIsDeleting] = useState<boolean>(false);
+  const [isEditing,               setIsEditing] = useState<boolean>(false);
+  const [editingCaseError, setEditingCaseError] = useState<EditingCaseError>(null);
+
+  function checkChangeCase(caseID: string, caseName: string) {
+    
+  }
 
   return (
     <tr key={caseRow.caseID}>
@@ -185,6 +287,7 @@ function CaseRow({
           <div className="edit-button-container">
             <button
               className="edit-case"
+              onClick={() => setIsEditing(true)}
             >
               <Icon 
                 path={mdiPencil}
@@ -205,10 +308,7 @@ function CaseRow({
           <div className="delete-button-container">
             <button 
               className="delete-case"
-              onClick={() => {
-                setIsDeleting(true);
-                onDeleteCase(caseRow.caseID);
-              }}
+              onClick={() => setIsDeleting(true)}
             >
               <Icon 
                 path={mdiTrashCanOutline}
@@ -217,6 +317,26 @@ function CaseRow({
             </button>
           </div>
         </div>
+        {isDeleting && (
+          <ConfirmModal
+            title={t("deletingCaseModalTitle")}
+            message={t("deletingCaseModalMessage") + " " + caseRow.caseID}
+            onCancel={() => setIsDeleting(false)}
+            onConfirm={() => {
+              onDeleteCase(caseRow.caseID);
+              setIsDeleting(false);
+            }}
+          />
+        )}
+        {isEditing && (
+          <EditingCaseModal 
+            message={t("editingCaseModalTitle")}
+            originalCaseID={caseRow.caseID}
+            originalCaseName={caseRow.caseName}
+            onChangeCase={onChangeCase}
+            onCloseSignal={() => setIsEditing(false)}
+          />
+        )}
       </th>
     </tr>
   );
@@ -229,12 +349,9 @@ interface CasesTableToolbarPropType {
 }
 
 type AddingCaseError = 
-  | "NetworkError"
   | "CaseIDSyntaxError"
   | "CaseIDRepeatedError"
   | "EmptyInputError"
-  | "TokenOutdatedError"
-  | "UnknownError"
   | null;
 
 /**
@@ -332,16 +449,12 @@ function CasesTableToolbar({
         <AlertModal 
           message={
             "[" + getCurrentTime() + "]: "
-              +  (addingCaseError === "NetworkError"
-              ? t("addingCaseNetworkError")
-              :   addingCaseError === "CaseIDSyntaxError"
+              +  (addingCaseError === "CaseIDSyntaxError"
               ? t("addingCaseIDSyntaxError")
               :   addingCaseError === "EmptyInputError"
               ? t("addingCaseEmptyInputError")
               :   addingCaseError === "CaseIDRepeatedError"
               ? t("addingCaseIDRepeatedError")
-              :   addingCaseError === "TokenOutdatedError"
-              ? t("addingCaseTokenOutdatedError")
               : t("addingCaseUnknownError"))
           }
           onCloseSignal={() => setAddingCaseError(null)}
@@ -355,12 +468,18 @@ interface CasesTablePropType {
   casesData: CaseInfo[];
   usersList: Map<number, string>;
   onDeleteCase: (caseID: string) => void;
+  onChangeCase: (
+    originalCaseID: string,
+    caseID: string, 
+    caseName: string
+  ) => void;
 }
 
 function CasesTable({
   casesData,
   usersList,
-  onDeleteCase
+  onDeleteCase,
+  onChangeCase
 }: CasesTablePropType) {
   const { t } = useTranslation();
   return (
@@ -381,6 +500,7 @@ function CasesTable({
             usersList={usersList}
             key={caseRow.caseID}
             onDeleteCase={onDeleteCase}
+            onChangeCase={onChangeCase}
           />
         })}
       </tbody>
@@ -394,6 +514,11 @@ interface CasesTableContainerPropType {
   userInfo: UserInfo;
   onAddCase: (addedCase: CaseInfo) => void;
   onDeleteCase: (caseID: string) => void;
+  onChangeCase: (
+    originalCaseID: string,
+    caseID: string, 
+    caseName: string
+  ) => void;
   checkCaseIDRepeated: (caseID: string) => boolean;
 }
 
@@ -403,6 +528,7 @@ function CasesTableContainer({
   userInfo,
   onAddCase,
   onDeleteCase,
+  onChangeCase,
   checkCaseIDRepeated,
 }: CasesTableContainerPropType) {
 
@@ -417,6 +543,7 @@ function CasesTableContainer({
         casesData={casesData} 
         usersList={usersList}
         onDeleteCase={onDeleteCase}
+        onChangeCase={onChangeCase}
       />
     </div>
   );
@@ -450,6 +577,8 @@ type QueryFieldType =
 type WorkingPageError =
   | "RefreshTokenOutdatedError"
   | "GetCasesUnknownError"
+  | "AddCaseUnknownError"
+  | "DeleteCaseUnknownError"
   | "GetCurrentUserUnknownError"
   | "AdminGetUsersListError"
   | null;
@@ -492,15 +621,37 @@ function WorkingPage({
 
   const totalPaginationCount = useRef<number>(1);
 
+  function handleRefreshToken() {
+    refreshTokenAPI.current
+      .post("/manager/refresh")
+      .then((response: AxiosResponse<RefreshTokenResponseData, any>) => {
+        onChangeToken({
+          JWTAccessToken: response.data.access_token,
+          JWTRefreshToken: token.JWTRefreshToken
+        });
+      })
+      .catch((error: ErrorResponse) => {
+        setWorkingPageError("RefreshTokenOutdatedError");
+        setTimeout(() => {
+          setWorkingPageError(null);
+          navigate("/login");
+        }, 3000);
+      });
+  }
+
   function handleAddCase(addedCase: CaseInfo) {
     workingAPI.current
       .post("/cases/case", {
         "case_id":    addedCase.caseID,
         "case_name":  addedCase.caseName
       })
-      .then((response: AxiosResponse<AddCaseResponseData, any>) => {
-        console.log(response.data);
-      });
+      .catch((error: ErrorResponse) => {
+        if (error.response.status === 401) {
+          handleRefreshToken();
+        } else {
+          setWorkingPageError("DeleteCaseUnknownError");
+        }
+      })
 
     let newCasesData: CaseInfo[] = [];
     for (let i: number = 0; i < casesData.length; ++i) {
@@ -541,19 +692,42 @@ function WorkingPage({
   function handleDeleteCase(caseID: string) {
     workingAPI.current
       .delete("/cases/case/" + caseID)
-      .then((response: AxiosResponse<DeleteCaseResponseData, any>) => {
-        console.log(response.data.message);
+      .catch((error: ErrorResponse) => {
+        if (error.response.status === 401) {
+          handleRefreshToken();
+        } else {
+          setWorkingPageError("AddCaseUnknownError");
+        }
       });
     
-    setCasesData(casesData.filter((originalCase) => {
+    let newCasesData: CaseInfo[] = filteredCasesData.filter((originalCase) => {
       if (originalCase.caseID !== caseID) {
         return originalCase;
       }
-    }));
+    });
+    setCasesData(newCasesData);
+    setFilteredCasesData(newCasesData);
   }
 
-  function handleChangeCase() {
-
+  function handleChangeCase(originalCaseID: string, caseID: string, caseName: string) {
+    let cases: CaseInfo[] = filteredCasesData.map((originalCase): CaseInfo => {
+      if (originalCase.caseID !== originalCaseID) {
+        return originalCase;
+      } else {
+        return {
+          caseID: caseID,
+          caseName: caseName,
+          addUserID: originalCase.addUserID,
+          clueCount: originalCase.clueCount
+        };
+      }
+    });
+    let newCasesData: CaseInfo[]
+      = isAscending
+      ? cases.sort((a, b) => 2 * Number(a[userClickedField] > b[userClickedField]) - 1)
+      : cases.sort((a, b) => 2 * Number(a[userClickedField] < b[userClickedField]) - 1);
+    setCasesData(newCasesData);
+    setFilteredCasesData(newCasesData);
   }
 
   useEffect(() => {
@@ -581,22 +755,7 @@ function WorkingPage({
 
           // If the serve response 401 status, then user need to refresh his
           // token, and re-store this token to the local storage.
-
-          refreshTokenAPI.current
-            .post("/manager/refresh")
-            .then((response: AxiosResponse<RefreshTokenResponseData, any>) => {
-              onChangeToken({
-                JWTAccessToken: response.data.access_token,
-                JWTRefreshToken: token.JWTRefreshToken
-              });
-            })
-            .catch((error: ErrorResponse) => {
-              setWorkingPageError("RefreshTokenOutdatedError");
-              setTimeout(() => {
-                setWorkingPageError(null);
-                navigate("/login");
-              }, 3000);
-            })
+          handleRefreshToken();
         } else {
           setWorkingPageError("GetCasesUnknownError");
         }
@@ -660,6 +819,7 @@ function WorkingPage({
             }}
             onAddCase={handleAddCase}
             onDeleteCase={handleDeleteCase}
+            onChangeCase={handleChangeCase}
             checkCaseIDRepeated={checkCaseIDRepeated}
           />
         ) : (
