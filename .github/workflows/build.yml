@@ -25,5 +25,6 @@ jobs:
     - name: Build
       run: |
         cd frontend
+        npm install -g grunt-cli
         npm install --force
         grunt
