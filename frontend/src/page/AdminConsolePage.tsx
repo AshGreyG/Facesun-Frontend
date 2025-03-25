@@ -53,7 +53,7 @@ function AddingUserModal({
   const { t } = useTranslation();
   const [passwordInput, setPasswordInput] = useState<string>("");
   const [usernameInput, setUsernameInput] = useState<string>("");
-  const [confirmInput, setConfirmInput] = useState<string>("");
+  const [confirmInput,   setConfirmInput] = useState<string>("");
 
   return (
     <AbstractModal
@@ -165,13 +165,35 @@ interface UsersTableToolbarPropType {
   onDeleteUser: (deletedUserID: number) => void;
 }
 
+type AddingUserError =
+  | "UsernameRepeatedError"
+  | "ConfirmPasswordMathError"
+  | "EmptyInputError"
+  | null;
+
 function UsersTableToolbar({
   onAddUser,
   onResetPassword,
   onDeleteUser
 }: UsersTableToolbarPropType) {
   const { t } = useTranslation();
-  const [isAddingUser, setIsAddingUser] = useState<boolean>(false);
+  const [isAddingUser,       setIsAddingUser] = useState<boolean>(false);
+  const [addingUserError, setAddingUserError] = useState<AddingUserError>(null);
+
+  function checkAddUser(
+    addedUserName: string,
+    addedPassword: string,
+    confirmPassword: string
+  ) {
+    if (addedUserName === "" || addedPassword === "" || confirmPassword === "") {
+      setAddingUserError("EmptyInputError");
+      return;
+    }
+    if (addedPassword !== confirmPassword) {
+      setAddingUserError("ConfirmPasswordMathError");
+      return;
+    }
+  }
 
   return (
     <div className="users-list-toolbar">
@@ -283,6 +305,7 @@ interface AdminConsolePagePropType {
 type AdminConsolePageError =
   | "RefreshTokenOutdatedError"
   | "AdminGetUsersListError"
+  | "AddUserUnknownError"
   | null;
 
 function AdminConsolePage({
@@ -293,7 +316,9 @@ function AdminConsolePage({
   const { t } = useTranslation();
 
   const [usersList,                         setUsersList] = useState<UserInfo[]>([]);
+  const [filteredUsersList,         setFilteredUsersList] = useState<UserInfo[]>([]);
   const [adminConsolePageError, setAdminConsolePageError] = useState<AdminConsolePageError>(null);
+  const [userClickedField,           setUserClickedField] = useState<keyof UserInfo>("userID");
 
    const workingAPI = useRef<AxiosInstance>(axios.create({
     baseURL: backendURL,
@@ -313,6 +338,33 @@ function AdminConsolePage({
     }
   }));
 
+  function handleRefreshToken() {
+    refreshTokenAPI.current
+      .post("/manager/refresh")
+      .then((response: AxiosResponse<RefreshTokenResponseData, any>) => {
+        onChangeToken({
+          JWTAccessToken: response.data.access_token,
+          JWTRefreshToken: token.JWTRefreshToken
+        });
+      })
+      .catch((error: ErrorResponse) => {
+        setAdminConsolePageError("RefreshTokenOutdatedError");
+        setTimeout(() => {
+          setAdminConsolePageError(null);
+          navigate("/login");
+        }, 3000);
+      });
+  }
+
+  function checkUsernameRepeated(username: string): boolean {
+    for (const user of usersList) {
+      if (user.username === username) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   function handleAddUser(
     addUsername: string,
     addPassword: string, 
@@ -324,12 +376,16 @@ function AdminConsolePage({
         password: addPassword,
         confirm_password: confirmPassword
       })
-      .then((response) => {
-        console.log(response);
-      })
-      .catch((error) => {
-        console.log(error);
-      })
+      .catch((error: ErrorResponse) => {
+        if (error.response.status === 401) {
+          handleRefreshToken();
+        } else {
+          setAdminConsolePageError("AddUserUnknownError");
+        }
+      });
+    
+    // Notice that the userID is determined by the backend, so we need to refresh the
+    // usersList
   }
 
   function handleResetPassword(
@@ -348,36 +404,20 @@ function AdminConsolePage({
     workingAPI.current
       .get("/manager/admin/users")
       .then((response: AxiosResponse<AdminGetUserListResponseData, any>) => {
-        setUsersList(response.data.data.users.map((rawUser): UserInfo => {
+          let newUsersList: UserInfo[] = response.data.data.users.map((rawUser): UserInfo => {
           return {
             defaultPhoneNumber: rawUser.default_phone,
             userID:             rawUser.id,
             username:           rawUser.username,
             isAdmin:            rawUser.is_admin
           };
-        }));
+        });
+        setUsersList(newUsersList);
+        setFilteredUsersList(newUsersList);
       })
       .catch((error: ErrorResponse) => {
         if (error.response.status === 401) {
-
-          // If the server response 401 status, then user need to refresh this
-          // token, and re-store this token to the local storage
-
-          refreshTokenAPI.current
-            .post("/manager/refresh")
-            .then((response: AxiosResponse<RefreshTokenResponseData, any>) => {
-              onChangeToken({
-                JWTAccessToken: response.data.access_token,
-                JWTRefreshToken: token.JWTRefreshToken
-              });
-            })
-            .catch((error: ErrorResponse) => {
-              setAdminConsolePageError("RefreshTokenOutdatedError");
-              setTimeout(() => {
-                setAdminConsolePageError(null);
-                navigate("/login");
-              }, 3000);
-            });
+          handleRefreshToken();
         } else {
           setAdminConsolePageError("AdminGetUsersListError");
         }
@@ -393,7 +433,7 @@ function AdminConsolePage({
       />
       <div className="admin-console-container">
         <UsersTableContainer 
-          usersList={usersList}
+          usersList={filteredUsersList}
           onAddUser={handleAddUser}
           onResetPassword={handleResetPassword}
           onDeleteUser={handleDeleteUser}

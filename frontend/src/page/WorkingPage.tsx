@@ -18,7 +18,9 @@ import {
   mdiPencil,
   mdiDotsHorizontal,
   mdiTrashCanOutline,
-  mdiRefresh
+  mdiRefresh,
+  mdiMagnify,
+  mdiFormatListBulleted
 } from "@mdi/js";
 
 import "./WorkingPage.css";
@@ -443,7 +445,19 @@ function CasesTableToolbar({
             inputName="query-text-field"
             placeholder={t("queryTextInputPlaceholder")}
           />
+          <button className="confirm-query">
+            <Icon
+              path={mdiMagnify}
+              size={1}
+            />
+          </button>
         </form>
+        <button className="select-query-field">
+          <Icon
+            path={mdiFormatListBulleted}
+            size={1}
+          />
+        </button>
       </div>
       <div className="button-components">
         <div className="add-case-button-container">
@@ -490,6 +504,20 @@ function CasesTableToolbar({
       )}
     </div>
   );
+}
+
+interface PaginationNavBarPropType {
+  totalPaginationCount: number;
+  paginationIndex: number;
+  onChangePaginationIndex: React.Dispatch<React.SetStateAction<number>>;
+}
+
+function PaginationNavBar({
+  totalPaginationCount,
+  paginationIndex,
+  onChangePaginationIndex
+}: PaginationNavBarPropType) {
+
 }
 
 interface CasesTablePropType {
@@ -601,11 +629,6 @@ interface WorkingPagePropType {
   onChangeToken: React.Dispatch<React.SetStateAction<LoginToken>>;
 };
 
-type QueryFieldType =
-  | "CaseID"
-  | "CaseName"
-  | "AddUserID";
-
 type WorkingPageError =
   | "RefreshTokenOutdatedError"
   | "GetCasesUnknownError"
@@ -644,15 +667,15 @@ function WorkingPage({
   const navigate = useNavigate();
 
   const { t } = useTranslation();
-  const [casesData,                 setCasesData] = useState<CaseInfo[]>([]);
-  const [filteredCasesData, setFilteredCasesData] = useState<CaseInfo[]>([]);
-  const [userClickedCaseID, setUserClickedCaseID] = useState<string | null>(null);
-  const [userClickedField,   setUserClickedField] = useState<keyof CaseInfo>("caseID");
-  const [isAscending,             setIsAscending] = useState<boolean>(true);
-  const [paginationIndex,     setPaginationIndex] = useState<number>(1);
-  const [workingPageError,   setWorkingPageError] = useState<WorkingPageError>(null);
-
-  const totalPaginationCount = useRef<number>(1);
+  const [casesData,                       setCasesData] = useState<CaseInfo[]>([]);
+  const [filteredCasesData,       setFilteredCasesData] = useState<CaseInfo[]>([]);
+  const [userClickedCaseID,       setUserClickedCaseID] = useState<string | null>(null);
+  const [userClickedField,         setUserClickedField] = useState<keyof CaseInfo>("caseID");
+  const [isAscending,                   setIsAscending] = useState<boolean>(true);
+  const [userQueryContent,         setUserQueryContent] = useState<string>("");
+  const [paginationIndex,           setPaginationIndex] = useState<number>(1);
+  const [totalPaginationCount, setTotalPaginationCount] = useState<number>(0);
+  const [workingPageError,         setWorkingPageError] = useState<WorkingPageError>(null);
 
   function handleRefreshToken() {
     refreshTokenAPI.current
@@ -672,6 +695,61 @@ function WorkingPage({
       });
   }
 
+  function checkCaseIDRepeated(caseID: string): boolean {
+    for (const caseData of casesData) {
+      if (caseData.caseID === caseID) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Actually, `filteredCasesData` should not be state because it can be
+  // calculated from `casesData`, `userClickedField`, `isAscending`, `userQueryContent`
+  // and `paginationIndex`. But the rendering is determined by the `filteredCasesData`.
+  // If we use `useRef` rather than `useState` to pass the prop `filteredCasesData` to
+  // children components, the rendering will not be triggered.
+   
+  useEffect(() => {
+    let middleFilteredCasesData1: CaseInfo[] = 
+      casesData.filter((originalCase) => {
+        if (
+          (userClickedField === "clueCount" || userClickedField === "addUserID") &&
+          originalCase[userClickedField] === parseInt(userQueryContent)
+        ) {
+          return true;
+        } else if (
+          (userClickedField === "caseID" || userClickedField === "caseName") &&
+          originalCase[userClickedField].indexOf(userQueryContent) !== -1
+        ) {
+          return true;
+        } else {
+          return false;
+        }
+      });
+
+    // First use variable `middleFilteredCasesData1` to store the query result.
+
+    let middleFilteredCasesData2: CaseInfo[]
+      = isAscending
+      ? (middleFilteredCasesData1.sort(
+          (a, b) => 2 * Number(a[userClickedField] > b[userClickedField]) - 1)
+        )
+      : (middleFilteredCasesData1.sort(
+          (a, b) => 2 * Number(a[userClickedField] < b[userClickedField]) - 1)
+        );
+    
+    // Then use variable `middleFilteredCasesData2` to store the sort result.
+
+    let middleFilteredCasesData3: CaseInfo[] 
+      = middleFilteredCasesData2.slice(
+        PAGINATION_RECORDS_NUM * (paginationIndex - 1),
+        Math.min(PAGINATION_RECORDS_NUM * paginationIndex, middleFilteredCasesData2.length)
+      );
+
+    setFilteredCasesData(middleFilteredCasesData3);
+  }, [casesData]);
+
   function handleAddCase(addedCase: CaseInfo) {
     workingAPI.current
       .post("/cases/case", {
@@ -689,8 +767,8 @@ function WorkingPage({
     let newCasesData: CaseInfo[] = [];
     for (let i: number = 0; i < casesData.length; ++i) {
       if (
-         isAscending && casesData[i][userClickedField] > addedCase[userClickedField] ||
-        !isAscending && casesData[i][userClickedField] < addedCase[userClickedField]
+         (isAscending && casesData[i][userClickedField] > addedCase[userClickedField]) ||
+        !(isAscending && casesData[i][userClickedField] < addedCase[userClickedField])
       ) { 
         newCasesData.push(...casesData.slice(0, i));
         newCasesData.push(addedCase);
@@ -701,25 +779,11 @@ function WorkingPage({
 
     setCasesData(newCasesData);
     setFilteredCasesData(newCasesData);
-
-    totalPaginationCount.current
-      = ((casesData.length - 1) + 1) / PAGINATION_RECORDS_NUM + 1;
+    
+    setTotalPaginationCount(((casesData.length - 1) + 1) / PAGINATION_RECORDS_NUM + 1);
     
     // Because setCasesData will wait for the next render, the casesData is still
     // the same with previous state. So here we need manually add the 1.
-  }
-
-  function checkCaseIDRepeated(caseID: string): boolean {
-    for (const caseData of casesData) {
-      if (caseData.caseID === caseID) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  function handleQueryTextField(queryField: QueryFieldType, queryText: string) {
-
   }
 
   function handleDeleteCase(caseID: string) {
@@ -733,7 +797,7 @@ function WorkingPage({
         }
       });
     
-    let newCasesData: CaseInfo[] = filteredCasesData.filter((originalCase) => {
+    let newCasesData: CaseInfo[] = casesData.filter((originalCase) => {
       if (originalCase.caseID !== caseID) {
         return originalCase;
       }
@@ -756,7 +820,7 @@ function WorkingPage({
         }
       });
 
-    let cases: CaseInfo[] = filteredCasesData.map((originalCase): CaseInfo => {
+    let cases: CaseInfo[] = casesData.map((originalCase): CaseInfo => {
       if (originalCase.caseID !== originalCaseID) {
         return originalCase;
       } else {
@@ -793,8 +857,7 @@ function WorkingPage({
           ? cases.sort((a, b) => 2 * Number(a[userClickedField] > b[userClickedField]) - 1)
           : cases.sort((a, b) => 2 * Number(a[userClickedField] < b[userClickedField]) - 1);
         setCasesData(newCasesData);
-        setFilteredCasesData(newCasesData);
-        totalPaginationCount.current = (cases.length - 1) / PAGINATION_RECORDS_NUM + 1;
+        setTotalPaginationCount((cases.length - 1) / PAGINATION_RECORDS_NUM + 1);
       })
       .catch((error: ErrorResponse) => {
         if (error.response.status === 401) {
