@@ -382,7 +382,7 @@ function AdminConsolePage({
           setAdminConsolePageError("AdminGetUsersListError");
         }
       });
-  });
+  }, []);
 
   return (
     <div className="admin-console-page">

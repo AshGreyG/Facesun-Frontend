@@ -41,12 +41,13 @@ const languageResources = {
       "deletingCaseModalMessage": "Are you sure to delete this case?",
 
       "editingCaseModalTitle": "Edit Case",
+      "editingCaseIDSyntaxError": "Wrong case ID syntax, please check your case ID and retry later",
+      "editingCaseEmptyInputError": "Case ID or Case Name input field are empty",
+      "editingCaseIDRepeatedError": "Repeated Case ID",
 
-      "addingCaseNetworkError": "Network error occurs, please refresh your web page or check your network",
-      "addingCaseIDSyntaxError": "Wrong case ID, please check your case ID and retry later",
+      "addingCaseIDSyntaxError": "Wrong case ID syntax, please check your case ID and retry later",
       "addingCaseEmptyInputError": "Case ID or Case Name input field are empty",
       "addingCaseIDRepeatedError": "Repeated Case ID",
-      "addingCaseTokenOutdatedError": "Your access token is out of date, please refresh your web page and retry",
       "addingCaseUnknownError": "Unknown error occurs",
       "workingPageLoadingRefreshTokenOutdatedError": "Your refresh token has been outdated, the page will navigate to login page automatically in 3s",
       "workingPageLoadingGetCasesUnknownError": "Unknown error occurs when getting cases",
@@ -103,11 +104,11 @@ const languageResources = {
       "deletingCaseModalTitle": "删除案件",
       "deletingCaseModalMessage": "你确定要删除这个案件吗？",
 
-      "addingCaseNetworkError": "网络错误，请刷新页面或检查您的网络",
+      "editingCaseModalTitle": "编辑案件",
+
       "addingCaseIDSyntaxError": "案件编号错误，请检查案件编号并重试",
       "addingCaseEmptyInputError": "案件编号或案件名称为空",
       "addingCaseIDRepeatedError": "案件编号重复",
-      "addingCaseTokenOutdatedError": "您的 token 已过期，请刷新页面重试",
       "addingCaseUnknownError": "未知错误",
       "workingPageLoadingRefreshTokenOutdatedError": "您的 refresh token 已过期，将在 3 秒内自动跳回登录页面",
       "workingPageLoadingGetCasesUnknownError": "在获取案件列表时发生未知错误",

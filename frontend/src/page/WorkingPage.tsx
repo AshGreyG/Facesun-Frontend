@@ -167,7 +167,6 @@ interface EditingCaseModalPropType {
    * @type {(caseID: string, caseName: string) => void}
    */
   onChangeCase: (
-    originalCaseID: string,
     caseID: string, 
     caseName: string
   ) => void;
@@ -233,7 +232,7 @@ function EditingCaseModal({
         </div>
         <div className="confirm-button-container">
           <button onClick={() => {
-            onChangeCase(originalCaseID, caseIDInput, caseNameInput);
+            onChangeCase(caseIDInput, caseNameInput);
             onCloseSignal();
           }}>
             {t("confirmButton")}
@@ -253,6 +252,7 @@ interface CaseRowPropType {
     caseID: string, 
     caseName: string
   ) => void;
+  checkCaseIDRepeated: (caseID: string) => boolean;
 }
 
 type EditingCaseError =
@@ -265,7 +265,8 @@ function CaseRow({
   caseRow,
   usersList,
   onDeleteCase,
-  onChangeCase
+  onChangeCase,
+  checkCaseIDRepeated
 }: CaseRowPropType) {
   const { t } = useTranslation();
   const [isDeleting,             setIsDeleting] = useState<boolean>(false);
@@ -273,7 +274,19 @@ function CaseRow({
   const [editingCaseError, setEditingCaseError] = useState<EditingCaseError>(null);
 
   function checkChangeCase(caseID: string, caseName: string) {
-    
+    if (caseID === "" || caseName === "") {
+      setEditingCaseError("EmptyInputError");
+      return;
+    }
+    if (!caseID.match(/^A\d{22}/)) {
+      setEditingCaseError("CaseIDSyntaxError");
+      return;
+    }
+    if (checkCaseIDRepeated(caseID) && caseID !== caseRow.caseID) {
+      setEditingCaseError("CaseIDRepeatedError");
+      return;
+    }
+    onChangeCase(caseRow.caseID, caseID, caseName);
   }
 
   return (
@@ -333,8 +346,23 @@ function CaseRow({
             message={t("editingCaseModalTitle")}
             originalCaseID={caseRow.caseID}
             originalCaseName={caseRow.caseName}
-            onChangeCase={onChangeCase}
+            onChangeCase={checkChangeCase}
             onCloseSignal={() => setIsEditing(false)}
+          />
+        )}
+        {editingCaseError && (
+          <AlertModal
+            message={
+              "[" + getCurrentTime() + "]: "
+                +  (editingCaseError === "CaseIDRepeatedError"
+                ? t("editingCaseIDRepeatedError")
+                :   editingCaseError === "CaseIDSyntaxError"
+                ? t("editingCaseIDSyntaxError")
+                :   editingCaseError === "EmptyInputError"
+                ? t("editingCaseEmptyInputError")
+                : t("editingCaseUnknownError"))
+            }
+            onCloseSignal={() => setEditingCaseError(null)}
           />
         )}
       </th>
@@ -343,9 +371,9 @@ function CaseRow({
 }
 
 interface CasesTableToolbarPropType {
+  userInfo: UserInfo;
   onAddCase: (addedCase: CaseInfo) => void;
   checkCaseIDRepeated: (caseID: string) => boolean;
-  userInfo: UserInfo;
 }
 
 type AddingCaseError = 
@@ -362,9 +390,9 @@ type AddingCaseError =
  * 
  */
 function CasesTableToolbar({
+  userInfo,
   onAddCase,
-  checkCaseIDRepeated,
-  userInfo
+  checkCaseIDRepeated
 }: CasesTableToolbarPropType) {
 
   const { t } = useTranslation();
@@ -473,13 +501,15 @@ interface CasesTablePropType {
     caseID: string, 
     caseName: string
   ) => void;
+  checkCaseIDRepeated: (caseID: string) => boolean;
 }
 
 function CasesTable({
   casesData,
   usersList,
   onDeleteCase,
-  onChangeCase
+  onChangeCase,
+  checkCaseIDRepeated
 }: CasesTablePropType) {
   const { t } = useTranslation();
   return (
@@ -501,6 +531,7 @@ function CasesTable({
             key={caseRow.caseID}
             onDeleteCase={onDeleteCase}
             onChangeCase={onChangeCase}
+            checkCaseIDRepeated={checkCaseIDRepeated}
           />
         })}
       </tbody>
@@ -544,6 +575,7 @@ function CasesTableContainer({
         usersList={usersList}
         onDeleteCase={onDeleteCase}
         onChangeCase={onChangeCase}
+        checkCaseIDRepeated={checkCaseIDRepeated}
       />
     </div>
   );
@@ -579,6 +611,7 @@ type WorkingPageError =
   | "GetCasesUnknownError"
   | "AddCaseUnknownError"
   | "DeleteCaseUnknownError"
+  | "ChangeCaseUnknownError"
   | "GetCurrentUserUnknownError"
   | "AdminGetUsersListError"
   | null;
@@ -710,6 +743,19 @@ function WorkingPage({
   }
 
   function handleChangeCase(originalCaseID: string, caseID: string, caseName: string) {
+    workingAPI.current
+      .post("/cases/case/" + originalCaseID, {
+        case_id: caseID,
+        case_name: caseName
+      })
+      .catch((error: ErrorResponse) => {
+        if (error.response.status === 401) {
+          handleRefreshToken();
+        } else {
+          setWorkingPageError("ChangeCaseUnknownError");
+        }
+      });
+
     let cases: CaseInfo[] = filteredCasesData.map((originalCase): CaseInfo => {
       if (originalCase.caseID !== originalCaseID) {
         return originalCase;
