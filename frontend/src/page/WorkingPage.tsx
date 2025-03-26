@@ -20,7 +20,9 @@ import {
   mdiTrashCanOutline,
   mdiRefresh,
   mdiMagnify,
-  mdiFormatListBulleted
+  mdiFormatListBulleted,
+  mdiSortDescending,
+  mdiSortAscending
 } from "@mdi/js";
 
 import "./WorkingPage.css";
@@ -374,6 +376,10 @@ function CaseRow({
 
 interface CasesTableToolbarPropType {
   userInfo: UserInfo;
+  isAscending: boolean;
+  userQueryContent: string;
+  onChangeAscending: React.Dispatch<React.SetStateAction<boolean>>;
+  onChangeUserQueryContent: React.Dispatch<React.SetStateAction<string>>;
   onAddCase: (addedCase: CaseInfo) => void;
   checkCaseIDRepeated: (caseID: string) => boolean;
 }
@@ -393,6 +399,10 @@ type AddingCaseError =
  */
 function CasesTableToolbar({
   userInfo,
+  isAscending,
+  userQueryContent,
+  onChangeAscending,
+  onChangeUserQueryContent,
   onAddCase,
   checkCaseIDRepeated
 }: CasesTableToolbarPropType) {
@@ -444,20 +454,37 @@ function CasesTableToolbar({
           <TextFieldInput 
             inputName="query-text-field"
             placeholder={t("queryTextInputPlaceholder")}
+            textInputValue={userQueryContent}
+            onTextInputChange={(e) => onChangeUserQueryContent(e.target.value)}
           />
-          <button className="confirm-query">
-            <Icon
-              path={mdiMagnify}
-              size={1}
-            />
-          </button>
         </form>
-        <button className="select-query-field">
+        <button className="select-query-field-button">
           <Icon
             path={mdiFormatListBulleted}
             size={1}
           />
         </button>
+        {isAscending ? (
+          <button 
+            className="change-to-descending"
+            onClick={() => onChangeAscending(false)}
+          >
+            <Icon
+              path={mdiSortDescending}
+              size={1}
+            />
+          </button>
+        ) : (
+          <button
+            className="change-to-ascending"
+            onClick={() => onChangeAscending(true)}
+          >
+            <Icon
+              path={mdiSortAscending}
+              size={1}
+            />
+          </button>
+        )}
       </div>
       <div className="button-components">
         <div className="add-case-button-container">
@@ -571,6 +598,10 @@ interface CasesTableContainerPropType {
   casesData: CaseInfo[];
   usersList: Map<number, string>;
   userInfo: UserInfo;
+  isAscending: boolean;
+  userQueryContent: string;
+  onChangeAscending: React.Dispatch<React.SetStateAction<boolean>>;
+  onChangeUserQueryContent: React.Dispatch<React.SetStateAction<string>>;
   onAddCase: (addedCase: CaseInfo) => void;
   onDeleteCase: (caseID: string) => void;
   onChangeCase: (
@@ -585,6 +616,10 @@ function CasesTableContainer({
   casesData,
   usersList,
   userInfo,
+  isAscending,
+  userQueryContent,
+  onChangeAscending,
+  onChangeUserQueryContent,
   onAddCase,
   onDeleteCase,
   onChangeCase,
@@ -594,6 +629,10 @@ function CasesTableContainer({
   return (
     <div className="cases-table-container">
       <CasesTableToolbar 
+        isAscending={isAscending}
+        userQueryContent={userQueryContent}
+        onChangeAscending={onChangeAscending}
+        onChangeUserQueryContent={onChangeUserQueryContent}
         onAddCase={onAddCase} 
         checkCaseIDRepeated={checkCaseIDRepeated}
         userInfo={userInfo}
@@ -748,7 +787,7 @@ function WorkingPage({
       );
 
     setFilteredCasesData(middleFilteredCasesData3);
-  }, [casesData]);
+  }, [casesData, isAscending, userClickedField, userQueryContent]);
 
   function handleAddCase(addedCase: CaseInfo) {
     workingAPI.current
@@ -926,6 +965,10 @@ function WorkingPage({
               username: "",
               isAdmin: false,
             }}
+            isAscending={isAscending}
+            userQueryContent={userQueryContent}
+            onChangeAscending={setIsAscending}
+            onChangeUserQueryContent={setUserQueryContent}
             onAddCase={handleAddCase}
             onDeleteCase={handleDeleteCase}
             onChangeCase={handleChangeCase}
