@@ -21,7 +21,11 @@ import {
   mdiRefresh,
   mdiFormatListBulleted,
   mdiSortDescending,
-  mdiSortAscending
+  mdiSortAscending,
+  mdiPageFirst,
+  mdiChevronLeft,
+  mdiChevronRight,
+  mdiPageLast
 } from "@mdi/js";
 
 import "./WorkingPage.css";
@@ -537,18 +541,96 @@ function CasesTableToolbar({
   );
 }
 
-interface PaginationNavBarPropType {
+interface PaginationNavbarPropType {
   totalPaginationCount: number;
   paginationIndex: number;
   onChangePaginationIndex: React.Dispatch<React.SetStateAction<number>>;
 }
 
-function PaginationNavBar({
+function PaginationNavbar({
   totalPaginationCount,
   paginationIndex,
   onChangePaginationIndex
-}: PaginationNavBarPropType) {
+}: PaginationNavbarPropType) {
+  const { t } = useTranslation();
+  const [paginationInput, setPaginationInput] = useState<string>(String(paginationIndex));
 
+  return (
+    <div className="pagination-navbar">
+      <div className="direction-buttons-container">
+        <span className="first-page-container">
+          <button className="first-page-button">
+            <Icon
+              path={mdiPageFirst}
+              size={1}
+            />
+          </button>
+        </span>
+        <span className="prev-page-container">
+          <button className="prev-page-button">
+            <Icon
+              path={mdiChevronLeft}
+              size={1}
+            />
+          </button>
+        </span>
+        <span className="pagination-info">
+          <p>
+            {paginationIndex + "/" + totalPaginationCount}
+          </p>
+        </span>
+        <span className="next-page-container">
+          <button className="next-page-button">
+            <Icon
+              path={mdiChevronRight}
+              size={1}
+            />
+          </button>
+        </span>
+        <span className="last-page-container">
+          <button className="last-page-button">
+            <Icon
+              path={mdiPageLast}
+              size={1}
+            />
+          </button>
+        </span>
+      </div>
+      <span className="jump-to-page-container">
+        <form 
+          className="jump-to-page-form"
+          onSubmit={(e) => e.preventDefault()}
+        >
+          <TextFieldInput
+            inputName="jump-to-page-input"
+            placeholder=""
+            textInputValue={paginationInput}
+            onTextInputChange={(e) => setPaginationInput(e.target.value)}
+          />
+          <button 
+            className="confirm-jump-button"
+            onClick={() => {
+              let parse = Number(paginationInput);
+              if (!Number.isNaN(parse)) {
+                onChangePaginationIndex(
+                  parse <= 0
+                    ? 1
+                    : parse > totalPaginationCount
+                      ? totalPaginationCount
+                      : parse
+                );
+              } else {
+                onChangePaginationIndex(paginationIndex);
+              }
+              console.log(paginationIndex, parse);
+            }}
+          >
+            {t("confirmButton")}
+          </button>
+        </form>
+      </span>
+    </div>
+  );
 }
 
 interface CasesTablePropType {
@@ -557,7 +639,7 @@ interface CasesTablePropType {
   onDeleteCase: (caseID: string) => void;
   onChangeCase: (
     originalCaseID: string,
-    caseID: string, 
+    caseID: string,
     caseName: string
   ) => void;
   checkCaseIDRepeated: (caseID: string) => boolean;
@@ -584,8 +666,8 @@ function CasesTable({
       </thead>
       <tbody>
         {casesData.map((caseRow) => {
-          return <CaseRow 
-            caseRow={caseRow} 
+          return <CaseRow
+            caseRow={caseRow}
             usersList={usersList}
             key={caseRow.caseID}
             onDeleteCase={onDeleteCase}
@@ -604,15 +686,18 @@ interface CasesTableContainerPropType {
   userInfo: UserInfo;
   isAscending: boolean;
   userQueryContent: string;
+  totalPaginationCount: number;
+  paginationIndex: number;
   onChangeAscending: React.Dispatch<React.SetStateAction<boolean>>;
   onChangeUserQueryContent: React.Dispatch<React.SetStateAction<string>>;
   onAddCase: (addedCase: CaseInfo) => void;
   onDeleteCase: (caseID: string) => void;
   onChangeCase: (
     originalCaseID: string,
-    caseID: string, 
+    caseID: string,
     caseName: string
   ) => void;
+  onChangePaginationIndex: React.Dispatch<React.SetStateAction<number>>;
   checkCaseIDRepeated: (caseID: string) => boolean;
   onRefreshCases: () => void;
 }
@@ -623,33 +708,41 @@ function CasesTableContainer({
   userInfo,
   isAscending,
   userQueryContent,
+  totalPaginationCount,
+  paginationIndex,
   onChangeAscending,
   onChangeUserQueryContent,
   onAddCase,
   onDeleteCase,
   onChangeCase,
+  onChangePaginationIndex,
   checkCaseIDRepeated,
   onRefreshCases
 }: CasesTableContainerPropType) {
 
   return (
     <div className="cases-table-container">
-      <CasesTableToolbar 
+      <CasesTableToolbar
         isAscending={isAscending}
         userQueryContent={userQueryContent}
         userInfo={userInfo}
         onChangeAscending={onChangeAscending}
         onChangeUserQueryContent={onChangeUserQueryContent}
-        onAddCase={onAddCase} 
+        onAddCase={onAddCase}
         checkCaseIDRepeated={checkCaseIDRepeated}
         onRefreshCases={onRefreshCases}
       />
-      <CasesTable 
-        casesData={casesData} 
+      <CasesTable
+        casesData={casesData}
         usersList={usersList}
         onDeleteCase={onDeleteCase}
         onChangeCase={onChangeCase}
         checkCaseIDRepeated={checkCaseIDRepeated}
+      />
+      <PaginationNavbar 
+        totalPaginationCount={totalPaginationCount}
+        paginationIndex={paginationIndex}
+        onChangePaginationIndex={onChangePaginationIndex}
       />
     </div>
   );
@@ -794,7 +887,7 @@ function WorkingPage({
       );
 
     setFilteredCasesData(middleFilteredCasesData3);
-  }, [casesData, isAscending, userClickedField, userQueryContent]);
+  }, [casesData, isAscending, userClickedField, userQueryContent, paginationIndex]);
 
   function handleRefreshCases() {
     workingAPI.current
@@ -813,7 +906,7 @@ function WorkingPage({
           ? cases.sort((a, b) => 2 * Number(a[userClickedField] > b[userClickedField]) - 1)
           : cases.sort((a, b) => 2 * Number(a[userClickedField] < b[userClickedField]) - 1);
         setCasesData(newCasesData);
-        setTotalPaginationCount((cases.length - 1) / PAGINATION_RECORDS_NUM + 1);
+        setTotalPaginationCount(Math.floor((cases.length - 1) / PAGINATION_RECORDS_NUM) + 1);
       })
       .catch((error: ErrorResponse) => {
         if (error.response.status === 401) {
@@ -978,11 +1071,14 @@ function WorkingPage({
             }}
             isAscending={isAscending}
             userQueryContent={userQueryContent}
+            totalPaginationCount={totalPaginationCount}
+            paginationIndex={paginationIndex}
             onChangeAscending={setIsAscending}
             onChangeUserQueryContent={setUserQueryContent}
             onAddCase={handleAddCase}
             onDeleteCase={handleDeleteCase}
             onChangeCase={handleChangeCase}
+            onChangePaginationIndex={setPaginationIndex}
             checkCaseIDRepeated={checkCaseIDRepeated}
             onRefreshCases={handleRefreshCases}
           />

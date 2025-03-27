@@ -33,6 +33,7 @@
 
 .cases-table-container table {
   margin-top: 20px;
+  margin-bottom: 20px;
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
@@ -273,4 +274,24 @@
 
 .cases-table-toolbar .query-form-container button:hover {
   background-color: var(--_hover-icon-color);
+}
+
+.pagination-navbar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+}
+
+.pagination-navbar .direction-buttons-container {
+  grid-column: 2;
+  justify-self: center;
+  display: flex;
+  flex-direction: row;
+}
+
+.pagination-navbar .jump-to-page-form {
+  display: flex;
+  flex-direction: row;
+  grid-column: 3;
+  justify-self: center;
 }
