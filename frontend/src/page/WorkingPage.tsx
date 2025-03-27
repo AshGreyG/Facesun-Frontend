@@ -19,7 +19,6 @@ import {
   mdiDotsHorizontal,
   mdiTrashCanOutline,
   mdiRefresh,
-  mdiMagnify,
   mdiFormatListBulleted,
   mdiSortDescending,
   mdiSortAscending
@@ -382,6 +381,7 @@ interface CasesTableToolbarPropType {
   onChangeUserQueryContent: React.Dispatch<React.SetStateAction<string>>;
   onAddCase: (addedCase: CaseInfo) => void;
   checkCaseIDRepeated: (caseID: string) => boolean;
+  onRefreshCases: () => void;
 }
 
 type AddingCaseError = 
@@ -404,7 +404,8 @@ function CasesTableToolbar({
   onChangeAscending,
   onChangeUserQueryContent,
   onAddCase,
-  checkCaseIDRepeated
+  checkCaseIDRepeated,
+  onRefreshCases
 }: CasesTableToolbarPropType) {
 
   const { t } = useTranslation();
@@ -499,7 +500,10 @@ function CasesTableToolbar({
           </button>
         </div>
         <div className="force-refresh-button-container">
-          <button className="force-refresh-button">
+          <button 
+            className="force-refresh-button"
+            onClick={() => onRefreshCases()}
+          >
             <Icon
               path={mdiRefresh}
               size={1}
@@ -610,6 +614,7 @@ interface CasesTableContainerPropType {
     caseName: string
   ) => void;
   checkCaseIDRepeated: (caseID: string) => boolean;
+  onRefreshCases: () => void;
 }
 
 function CasesTableContainer({
@@ -624,6 +629,7 @@ function CasesTableContainer({
   onDeleteCase,
   onChangeCase,
   checkCaseIDRepeated,
+  onRefreshCases
 }: CasesTableContainerPropType) {
 
   return (
@@ -631,11 +637,12 @@ function CasesTableContainer({
       <CasesTableToolbar 
         isAscending={isAscending}
         userQueryContent={userQueryContent}
+        userInfo={userInfo}
         onChangeAscending={onChangeAscending}
         onChangeUserQueryContent={onChangeUserQueryContent}
         onAddCase={onAddCase} 
         checkCaseIDRepeated={checkCaseIDRepeated}
-        userInfo={userInfo}
+        onRefreshCases={onRefreshCases}
       />
       <CasesTable 
         casesData={casesData} 
@@ -789,6 +796,37 @@ function WorkingPage({
     setFilteredCasesData(middleFilteredCasesData3);
   }, [casesData, isAscending, userClickedField, userQueryContent]);
 
+  function handleRefreshCases() {
+    workingAPI.current
+      .get("/cases/case")
+      .then((response: AxiosResponse<GetCasesResponseData, any>) => {
+        const cases: CaseInfo[] = response.data.data.map((rawCase): CaseInfo => {
+          return {
+            addUserID:  rawCase.add_user_id,
+            caseID:     rawCase.case_id,
+            caseName:   rawCase.case_name,
+            clueCount:  rawCase.clue_count
+          };
+        });
+        let newCasesData: CaseInfo[] 
+          = isAscending 
+          ? cases.sort((a, b) => 2 * Number(a[userClickedField] > b[userClickedField]) - 1)
+          : cases.sort((a, b) => 2 * Number(a[userClickedField] < b[userClickedField]) - 1);
+        setCasesData(newCasesData);
+        setTotalPaginationCount((cases.length - 1) / PAGINATION_RECORDS_NUM + 1);
+      })
+      .catch((error: ErrorResponse) => {
+        if (error.response.status === 401) {
+
+          // If the serve response 401 status, then user need to refresh his
+          // token, and re-store this token to the local storage.
+          handleRefreshToken();
+        } else {
+          setWorkingPageError("GetCasesUnknownError");
+        }
+      });
+  }
+
   function handleAddCase(addedCase: CaseInfo) {
     workingAPI.current
       .post("/cases/case", {
@@ -880,34 +918,7 @@ function WorkingPage({
   }
 
   useEffect(() => {
-    workingAPI.current
-      .get("/cases/case")
-      .then((response: AxiosResponse<GetCasesResponseData, any>) => {
-        const cases: CaseInfo[] = response.data.data.map((rawCase): CaseInfo => {
-          return {
-            addUserID:  rawCase.add_user_id,
-            caseID:     rawCase.case_id,
-            caseName:   rawCase.case_name,
-            clueCount:  rawCase.clue_count
-          };
-        });
-        let newCasesData: CaseInfo[] 
-          = isAscending 
-          ? cases.sort((a, b) => 2 * Number(a[userClickedField] > b[userClickedField]) - 1)
-          : cases.sort((a, b) => 2 * Number(a[userClickedField] < b[userClickedField]) - 1);
-        setCasesData(newCasesData);
-        setTotalPaginationCount((cases.length - 1) / PAGINATION_RECORDS_NUM + 1);
-      })
-      .catch((error: ErrorResponse) => {
-        if (error.response.status === 401) {
-
-          // If the serve response 401 status, then user need to refresh his
-          // token, and re-store this token to the local storage.
-          handleRefreshToken();
-        } else {
-          setWorkingPageError("GetCasesUnknownError");
-        }
-      });
+    handleRefreshCases();
 
     workingAPI.current
       .get("/manager/getCurrentUser")
@@ -973,6 +984,7 @@ function WorkingPage({
             onDeleteCase={handleDeleteCase}
             onChangeCase={handleChangeCase}
             checkCaseIDRepeated={checkCaseIDRepeated}
+            onRefreshCases={handleRefreshCases}
           />
         ) : (
           <CluesTableContainer casesData={casesData} />
