@@ -25,7 +25,8 @@ import {
   mdiPageFirst,
   mdiChevronLeft,
   mdiChevronRight,
-  mdiPageLast
+  mdiPageLast,
+  mdiCheck
 } from "@mdi/js";
 
 import "./WorkingPage.css";
@@ -622,10 +623,12 @@ function PaginationNavbar({
               } else {
                 onChangePaginationIndex(paginationIndex);
               }
-              console.log(paginationIndex, parse);
             }}
           >
-            {t("confirmButton")}
+            <Icon
+              path={mdiCheck}
+              size={1}
+            />
           </button>
         </form>
       </span>

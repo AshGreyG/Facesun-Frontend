@@ -294,4 +294,39 @@
   flex-direction: row;
   grid-column: 3;
   justify-self: center;
+  justify-content: center;
+  align-items: center;
+  float: left;
+}
+
+.pagination-navbar .direction-buttons-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.pagination-navbar .jump-to-page-container button,
+.pagination-navbar .direction-buttons-container button {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  background-color: transparent;
+  border: none;
+  height: 30px;
+  width: 30px;
+  border-radius: 15px;
+  transition: background-color 0.15s ease-in;
+}
+
+.pagination-navbar .jump-to-page-container button:hover,
+.pagination-navbar .direction-buttons-container button:hover {
+  background-color: var(--_hover-icon-color);
+}
+
+.pagination-navbar .text-field-container input {
+  width: 25px !important;
 }
