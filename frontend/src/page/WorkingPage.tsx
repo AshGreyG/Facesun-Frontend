@@ -560,7 +560,10 @@ function PaginationNavbar({
     <div className="pagination-navbar">
       <div className="direction-buttons-container">
         <span className="first-page-container">
-          <button className="first-page-button">
+          <button 
+            className="first-page-button"
+            onClick={() => onChangePaginationIndex(1)}
+          >
             <Icon
               path={mdiPageFirst}
               size={1}
@@ -568,7 +571,10 @@ function PaginationNavbar({
           </button>
         </span>
         <span className="prev-page-container">
-          <button className="prev-page-button">
+          <button 
+            className="prev-page-button"
+            onClick={() => onChangePaginationIndex((n) => n -1)}
+          >
             <Icon
               path={mdiChevronLeft}
               size={1}
@@ -581,7 +587,10 @@ function PaginationNavbar({
           </p>
         </span>
         <span className="next-page-container">
-          <button className="next-page-button">
+          <button 
+            className="next-page-button"
+            onClick={() => onChangePaginationIndex((n) => n + 1)}
+          >
             <Icon
               path={mdiChevronRight}
               size={1}
@@ -589,7 +598,10 @@ function PaginationNavbar({
           </button>
         </span>
         <span className="last-page-container">
-          <button className="last-page-button">
+          <button 
+            className="last-page-button"
+            onClick={() => onChangePaginationIndex(totalPaginationCount)}
+          >
             <Icon
               path={mdiPageLast}
               size={1}
@@ -932,6 +944,7 @@ function WorkingPage({
       .catch((error: ErrorResponse) => {
         if (error.response.status === 401) {
           handleRefreshToken();
+          console.log("Oh no");
         } else {
           setWorkingPageError("DeleteCaseUnknownError");
         }
@@ -951,9 +964,9 @@ function WorkingPage({
     }
 
     setCasesData(newCasesData);
-    setFilteredCasesData(newCasesData);
-    
-    setTotalPaginationCount(((casesData.length - 1) + 1) / PAGINATION_RECORDS_NUM + 1);
+    setTotalPaginationCount(Math.floor(((casesData.length - 1) + 1) / PAGINATION_RECORDS_NUM) + 1);
+
+    // 😠 Please use Math.floor!
     
     // Because setCasesData will wait for the next render, the casesData is still
     // the same with previous state. So here we need manually add the 1.
