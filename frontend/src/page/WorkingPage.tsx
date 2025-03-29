@@ -573,7 +573,11 @@ function PaginationNavbar({
         <span className="prev-page-container">
           <button 
             className="prev-page-button"
-            onClick={() => onChangePaginationIndex((n) => n -1)}
+            onClick={() => onChangePaginationIndex(
+              paginationIndex <= 1
+                ? 1
+                : paginationIndex - 1
+            )}
           >
             <Icon
               path={mdiChevronLeft}
@@ -589,7 +593,11 @@ function PaginationNavbar({
         <span className="next-page-container">
           <button 
             className="next-page-button"
-            onClick={() => onChangePaginationIndex((n) => n + 1)}
+            onClick={() => onChangePaginationIndex(
+              paginationIndex >= totalPaginationCount
+                ? totalPaginationCount
+                : paginationIndex + 1
+            )}
           >
             <Icon
               path={mdiChevronRight}
