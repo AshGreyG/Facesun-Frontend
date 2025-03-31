@@ -10,7 +10,7 @@ import axios, {
 } from "axios";
 
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { useInRouterContext, useNavigate } from "react-router-dom";
 import Icon from "@mdi/react";
 
 import { 
@@ -254,6 +254,7 @@ function EditingCaseModal({
 interface CaseRowPropType {
   caseRow: CaseInfo;
   usersList: Map<number, string>;
+  userInfo: UserInfo;
   onDeleteCase: (caseID: string) => void;
   onChangeCase: (
     originalCaseID: string,
@@ -272,6 +273,7 @@ type EditingCaseError =
 function CaseRow({ 
   caseRow,
   usersList,
+  userInfo,
   onDeleteCase,
   onChangeCase,
   checkCaseIDRepeated
@@ -302,7 +304,9 @@ function CaseRow({
       <th scope="col" key={1}>{caseRow.caseID}</th>
       <th scope="col" key={2}>{caseRow.caseName}</th>
       <th scope="col" key={3}>{caseRow.clueCount}</th>
-      <th scope="col" key={4}>{usersList.get(caseRow.addUserID)}</th>
+      <th scope="col" key={4}>
+        {userInfo.isAdmin ? usersList.get(caseRow.addUserID) : userInfo.username}
+      </th>
       <th scope="col" key={5}>
         <div className="buttons-container">
           <div className="edit-button-container">
@@ -382,10 +386,10 @@ interface CasesTableToolbarPropType {
   userInfo: UserInfo;
   isAscending: boolean;
   userQueryContent: string;
+  checkCaseIDRepeated: (caseID: string) => boolean;
   onChangeAscending: React.Dispatch<React.SetStateAction<boolean>>;
   onChangeUserQueryContent: React.Dispatch<React.SetStateAction<string>>;
   onAddCase: (addedCase: CaseInfo) => void;
-  checkCaseIDRepeated: (caseID: string) => boolean;
   onRefreshCases: () => void;
 }
 
@@ -659,6 +663,7 @@ function PaginationNavbar({
 interface CasesTablePropType {
   casesData: CaseInfo[];
   usersList: Map<number, string>;
+  userInfo: UserInfo,
   onDeleteCase: (caseID: string) => void;
   onChangeCase: (
     originalCaseID: string,
@@ -671,6 +676,7 @@ interface CasesTablePropType {
 function CasesTable({
   casesData,
   usersList,
+  userInfo,
   onDeleteCase,
   onChangeCase,
   checkCaseIDRepeated
@@ -692,6 +698,7 @@ function CasesTable({
           return <CaseRow
             caseRow={caseRow}
             usersList={usersList}
+            userInfo={userInfo}
             key={caseRow.caseID}
             onDeleteCase={onDeleteCase}
             onChangeCase={onChangeCase}
@@ -758,6 +765,7 @@ function CasesTableContainer({
       <CasesTable
         casesData={casesData}
         usersList={usersList}
+        userInfo={userInfo}
         onDeleteCase={onDeleteCase}
         onChangeCase={onChangeCase}
         checkCaseIDRepeated={checkCaseIDRepeated}
@@ -836,7 +844,7 @@ function WorkingPage({
   const [isAscending,                   setIsAscending] = useState<boolean>(true);
   const [userQueryContent,         setUserQueryContent] = useState<string>("");
   const [paginationIndex,           setPaginationIndex] = useState<number>(1);
-  const [totalPaginationCount, setTotalPaginationCount] = useState<number>(0);
+  const [totalPaginationCount, setTotalPaginationCount] = useState<number>(1);
   const [workingPageError,         setWorkingPageError] = useState<WorkingPageError>(null);
 
   function handleRefreshToken() {
@@ -873,8 +881,8 @@ function WorkingPage({
   // children components, the rendering will not be triggered.
    
   useEffect(() => {
-    let middleFilteredCasesData1: CaseInfo[] = 
-      casesData.filter((originalCase) => {
+    let middleFilteredCasesData1: CaseInfo[] 
+     = casesData.filter((originalCase) => {
         if (
           (userClickedField === "clueCount" || userClickedField === "addUserID") &&
           originalCase[userClickedField] === parseInt(userQueryContent)
@@ -1068,7 +1076,12 @@ function WorkingPage({
         });
       })
       .catch((error: ErrorResponse) => {
-        setWorkingPageError("AdminGetUsersListError");
+        if (error.response.status !== 403) {
+          setWorkingPageError("AdminGetUsersListError");
+        }
+
+        // 😎 Notice that when backend responses 403 error, it indicates that
+        // the user is not the admin, and that doesn't need an error !!!
       });
 
   }, []);
@@ -1120,7 +1133,7 @@ function WorkingPage({
             ? t("workingPageLoadingGetCasesUnknownError")
             :   workingPageError === "GetCurrentUserUnknownError"
             ? t("workingPageLoadingGetCurrentUserUnknownError")
-            :  (workingPageError === "AdminGetUsersListError" && userInfo.current?.isAdmin)
+            :  (workingPageError === "AdminGetUsersListError")
             ? t("workingPageAdminGetUsersListError")
             : t("workingPageLoadingUnknownError"))
           }

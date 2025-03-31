@@ -59,11 +59,16 @@ const languageResources = {
 
       "adminConsolePageName": "Manage Accounts",
       "userID": "User ID",
+      "isAdmin": "Is Admin?",
       "userName": "Username",
       "phoneNumber": "Tel.",
-      "addingUserUsernameInputPlaceholder": "Username",
-      "addingUserPasswordInputPlaceholder": "Password",
-      "addingUserConfirmInputPlaceholder": "Confirm Your Password"
+      "addingUserModalTitle": "Add User",
+      "addingUserUsernameInputPlaceholder": "Username*",
+      "addingUserPasswordInputPlaceholder": "Password*",
+      "addingUserConfirmInputPlaceholder": "Confirm Your Password*",
+      "addingUserUsernameRepeatedError": "Repeated username",
+      "addingUserConfirmPasswordError": "The confirm password is not same with user password",
+      "addingUserEmptyInputError": "Username, Password or Confirm Password field are empty"
     }
   },
   zh: {
@@ -119,9 +124,14 @@ const languageResources = {
       // Admin Console Page Translation
 
       "adminConsolePageName": "账户管理",
+      "addingUserModalTitle": "增加账号",
       "userID": "用户编号",
+      "isAdmin": "是否是管理员",
       "userName": "用户名",
-      "phoneNumber": "联系电话"
+      "phoneNumber": "联系电话",
+      "addingUserUsernameInputPlaceholder": "用户名（必填）",
+      "addingUserPasswordInputPlaceholder": "密码（必填）",
+      "addingUserConfirmInputPlaceholder": "确认密码（必填）"
     }
   }
 };

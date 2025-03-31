@@ -21,7 +21,7 @@ import {
 } from "@mdi/js";
 
 import "./AdminConsolePage.css"
-import { backendURL } from "../utility/utility.tsx";
+import { backendURL, getCurrentTime, PAGINATION_RECORDS_NUM } from "../utility/utility.tsx";
 
 import { 
   AdminGetUserListResponseData, 
@@ -34,6 +34,7 @@ import {
 import TopBar from "../components/TopBar.tsx";
 import TextFieldInput from "../components/TextFieldInput.tsx";
 import AbstractModal from "../components/AbstractModal.tsx";
+import AlertModal from "../components/AlertModal.tsx";
 
 interface AddingUserModalPropType {
   message: string;
@@ -111,6 +112,12 @@ function AddingUserModal({
 
 interface UserRowPropType {
   user: UserInfo;
+  onResetPassword: (
+    userID: number,
+    newPassword: string,
+    confirmPassword: string
+  ) => void;
+  onDeleteUser: (deletedUserID: number) => void;
 }
 
 /**
@@ -122,8 +129,9 @@ function UserRow({ user }: UserRowPropType) {
     <tr key={user.userID}>
       <th scope="col" key={1}>{user.userID}</th>
       <th scope="col" key={2}>{user.username}</th>
-      <th scope="col" key={3}>{user.defaultPhoneNumber ?? "/"}</th>
-      <th scope="col" key={4}>
+      <th scope="col" key={3}>{user.isAdmin ? "✅" : "❌"}</th>
+      <th scope="col" key={4}>{user.defaultPhoneNumber ?? "/"}</th>
+      <th scope="col" key={5}>
         <div className="buttons-container">
           <div className="reset-password-button-container">
             <button 
@@ -152,29 +160,33 @@ function UserRow({ user }: UserRowPropType) {
 }
 
 interface UsersTableToolbarPropType {
+  isAscending: boolean;
+  userQueryContent: string;
+  checkUsernameRepeated: (username: string) => boolean;
+  onChangAscending: React.Dispatch<React.SetStateAction<boolean>>;
+  onChangeUserQueryContent: React.Dispatch<React.SetStateAction<string>>;
   onAddUser: (
     addUsername: string,
     addedPassword: string, 
     confirmPassword: string
   ) => void;
-  onResetPassword: (
-    userID: number,
-    newPassword: string,
-    confirmPassword: string
-  ) => void;
-  onDeleteUser: (deletedUserID: number) => void;
+  onRefreshUsers: () => void;
 }
 
 type AddingUserError =
   | "UsernameRepeatedError"
-  | "ConfirmPasswordMathError"
+  | "ConfirmPasswordError"
   | "EmptyInputError"
   | null;
 
 function UsersTableToolbar({
+  isAscending,
+  userQueryContent,
+  checkUsernameRepeated,
+  onChangAscending,
+  onChangeUserQueryContent,
   onAddUser,
-  onResetPassword,
-  onDeleteUser
+  onRefreshUsers
 }: UsersTableToolbarPropType) {
   const { t } = useTranslation();
   const [isAddingUser,       setIsAddingUser] = useState<boolean>(false);
@@ -190,9 +202,14 @@ function UsersTableToolbar({
       return;
     }
     if (addedPassword !== confirmPassword) {
-      setAddingUserError("ConfirmPasswordMathError");
+      setAddingUserError("ConfirmPasswordError");
       return;
     }
+    if (checkUsernameRepeated(addedUserName)) {
+      setAddingUserError("UsernameRepeatedError");
+      return;
+    }
+    onAddUser(addedUserName, addedPassword, confirmPassword);
   }
 
   return (
@@ -231,8 +248,23 @@ function UsersTableToolbar({
       {isAddingUser && (
         <AddingUserModal
           message={t("addingUserModalTitle")}
-          onAddUser={onAddUser}
+          onAddUser={checkAddUser}
           onCloseSignal={() => setIsAddingUser(false)}
+        />
+      )}
+      {addingUserError && (
+        <AlertModal
+          message={
+            "[" + getCurrentTime() + "]: "
+              +  (addingUserError === "UsernameRepeatedError"
+              ? t("addingUserUsernameRepeatedError")
+              :   addingUserError === "ConfirmPasswordError"
+              ? t("addingUserConfirmPasswordError")
+              :   addingUserError === "EmptyInputError"
+              ? t("addingUserEmptyInputError")
+              : t("addingUserUnknownError"))
+          }
+          onCloseSignal={() => setAddingUserError(null)}
         />
       )}
     </div>
@@ -241,10 +273,19 @@ function UsersTableToolbar({
 
 interface UsersTablePropType {
   usersList: UserInfo[];
-
+  onResetPassword: (
+    userID: number,
+    newPassword: string,
+    confirmPassword: string
+  ) => void;
+  onDeleteUser: (deletedUserID: number) => void;
 }
 
-function UsersTable({ usersList }: UsersTablePropType) {
+function UsersTable({ 
+  usersList,
+  onResetPassword,
+  onDeleteUser
+}: UsersTablePropType) {
   const { t } = useTranslation();
   return (
     <table className="users-table">
@@ -252,12 +293,19 @@ function UsersTable({ usersList }: UsersTablePropType) {
         <tr key={0}>
           <th scope="col" key={1}>{t("userID")}</th>
           <th scope="col" key={2}>{t("userName")}</th>
-          <th scope="col" key={3}>{t("phoneNumber")}</th>
-          <th scope="col" key={4}>{t("editButtons")}</th>
+          <th scope="col" key={3}>{t("isAdmin")}</th>
+          <th scope="col" key={4}>{t("phoneNumber")}</th>
+          <th scope="col" key={5}>{t("editButtons")}</th>
         </tr>
       </thead>
       <tbody>
-        {usersList.map((user) => <UserRow user={user}/> )}
+        {usersList.map((user) => 
+          <UserRow 
+            user={user}
+            onResetPassword={onResetPassword}
+            onDeleteUser={onDeleteUser}
+          /> 
+        )}
       </tbody>
     </table>
   );
@@ -265,6 +313,12 @@ function UsersTable({ usersList }: UsersTablePropType) {
 
 interface UsersTableContainerPropType {
   usersList: UserInfo[];
+  isAscending: boolean;
+  userQueryContent: string;
+  checkUsernameRepeated: (username: string) => boolean;
+  onChangAscending: React.Dispatch<React.SetStateAction<boolean>>;
+  onChangeUserQueryContent: React.Dispatch<React.SetStateAction<string>>;
+  onRefreshUsers: () => void;
   onAddUser: (
     addUsername: string,
     addPassword: string, 
@@ -280,6 +334,12 @@ interface UsersTableContainerPropType {
 
 function UsersTableContainer({ 
   usersList,
+  isAscending,
+  userQueryContent,
+  checkUsernameRepeated,
+  onChangAscending,
+  onChangeUserQueryContent,
+  onRefreshUsers,
   onAddUser,
   onResetPassword,
   onDeleteUser
@@ -288,11 +348,19 @@ function UsersTableContainer({
   return (
     <div className="users-table-container">
       <UsersTableToolbar
+        isAscending={isAscending}
+        userQueryContent={userQueryContent}
+        checkUsernameRepeated={checkUsernameRepeated}
+        onChangAscending={onChangAscending}
+        onChangeUserQueryContent={onChangeUserQueryContent}
         onAddUser={onAddUser}
+        onRefreshUsers={onRefreshUsers}
+      />
+      <UsersTable 
+        usersList={usersList} 
         onResetPassword={onResetPassword}
         onDeleteUser={onDeleteUser}
       />
-      <UsersTable usersList={usersList} />
     </div>
   )
 }
@@ -315,12 +383,7 @@ function AdminConsolePage({
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  const [usersList,                         setUsersList] = useState<UserInfo[]>([]);
-  const [filteredUsersList,         setFilteredUsersList] = useState<UserInfo[]>([]);
-  const [adminConsolePageError, setAdminConsolePageError] = useState<AdminConsolePageError>(null);
-  const [userClickedField,           setUserClickedField] = useState<keyof UserInfo>("userID");
-
-   const workingAPI = useRef<AxiosInstance>(axios.create({
+  const workingAPI = useRef<AxiosInstance>(axios.create({
     baseURL: backendURL,
     timeout: 5000,
     headers: {
@@ -337,6 +400,15 @@ function AdminConsolePage({
       "Content-Type": "application/json"
     }
   }));
+
+  const [usersList,                         setUsersList] = useState<UserInfo[]>([]);
+  const [filteredUsersList,         setFilteredUsersList] = useState<UserInfo[]>([]);
+  const [userClickedField,           setUserClickedField] = useState<keyof UserInfo>("username");
+  const [isAscending,                     setIsAscending] = useState<boolean>(true);
+  const [userQueryContent,           setUserQueryContent] = useState<string>("");
+  const [paginationIndex,             setPaginationIndex] = useState<number>(1);
+  const [totalPaginationCount,   setTotalPaginationCount] = useState<number>(1);
+  const [adminConsolePageError, setAdminConsolePageError] = useState<AdminConsolePageError>(null);
 
   function handleRefreshToken() {
     refreshTokenAPI.current
@@ -363,6 +435,74 @@ function AdminConsolePage({
       }
     }
     return false;
+  }
+
+  useEffect(() => {
+    let middleFilteredUsersList1: UserInfo[] 
+      = usersList.filter((originalUser) => {
+        if (
+          userClickedField === "userID" &&
+          originalUser[userClickedField] === parseInt(userQueryContent)
+        ) {
+          return true;
+        } else if (
+          userClickedField === "defaultPhoneNumber" &&
+          ((originalUser[userClickedField] !== null && 
+            originalUser[userClickedField].indexOf(userQueryContent) !== -1) ||
+           (originalUser[userClickedField] === null &&
+            userQueryContent === "/")
+          )
+        ) {
+          return true;
+        } else if (
+          userClickedField === "isAdmin" &&
+          originalUser[userClickedField] === (userQueryContent === "✅")
+        ) {
+          return true;
+        } else if (
+          userClickedField === "username" &&
+          originalUser[userClickedField].indexOf(userQueryContent) !== -1
+        ) {
+          return true;
+        } else {
+          return false;
+        }
+      });
+    
+    // First use variable `middleFilteredUsersList1` to store the query result.
+
+    let middleFilteredUsersList2: UserInfo[]
+      = isAscending
+      ? (middleFilteredUsersList1.sort(
+        (a, b) => 2 * Number(
+          a[userClickedField] && 
+          b[userClickedField] && 
+          a[userClickedField] > b[userClickedField]
+        ) - 1
+      ))
+      : (middleFilteredUsersList1.sort(
+        (a, b) => 2 * Number(
+          a[userClickedField] &&
+          b[userClickedField] &&
+          a[userClickedField] < b[userClickedField]
+        ) - 1
+      ));
+
+    // Then we use variable `middleFilteredUsersList2` to store the sort result.
+    // Notice `a[userClickedField]` and `b[userClickedField]` may be `null`, and
+    // `null` can't be compared.
+
+    let middleFilteredUsersList3: UserInfo[]
+      = middleFilteredUsersList2.slice(
+        PAGINATION_RECORDS_NUM * (paginationIndex - 1),
+        Math.min(PAGINATION_RECORDS_NUM * paginationIndex, middleFilteredUsersList2.length),
+      );
+
+    setFilteredUsersList(middleFilteredUsersList3);
+  }, [usersList, isAscending, userClickedField, userQueryContent, paginationIndex]);
+
+  function handleRefreshUsers() {
+
   }
 
   function handleAddUser(
@@ -434,6 +574,12 @@ function AdminConsolePage({
       <div className="admin-console-container">
         <UsersTableContainer 
           usersList={filteredUsersList}
+          isAscending={isAscending}
+          userQueryContent={userQueryContent}
+          checkUsernameRepeated={checkUsernameRepeated}
+          onChangAscending={setIsAscending}
+          onChangeUserQueryContent={setUserQueryContent}
+          onRefreshUsers={handleRefreshUsers}
           onAddUser={handleAddUser}
           onResetPassword={handleResetPassword}
           onDeleteUser={handleDeleteUser}
