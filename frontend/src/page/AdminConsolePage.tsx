@@ -17,7 +17,15 @@ import {
   mdiLockReset,
   mdiTrashCanOutline,
   mdiPlus,
-  mdiRefresh
+  mdiRefresh,
+  mdiFormatListBulleted,
+  mdiSortDescending,
+  mdiSortAscending,
+  mdiPageFirst,
+  mdiChevronLeft,
+  mdiChevronRight,
+  mdiPageLast,
+  mdiCheck
 } from "@mdi/js";
 
 import "./AdminConsolePage.css"
@@ -221,13 +229,43 @@ function UsersTableToolbar({
         >
           <TextFieldInput
             inputName="query-text-field"
+            placeholder={t("queryTextInputPlaceholder")}
+            textInputValue={userQueryContent}
+            onTextInputChange={(e) => onChangeUserQueryContent(e.target.value)}
           />
         </form>
+        <button className="select-query-field-button">
+          <Icon
+            path={mdiFormatListBulleted}
+            size={1}
+          />
+        </button>
+        {isAscending ? (
+          <button 
+            className="change-to-descending"
+            onClick={() => onChangAscending(false)}
+          >
+            <Icon
+              path={mdiSortDescending}
+              size={1}
+            />
+          </button>
+        ) : (
+          <button 
+            className="change-to-ascending"
+            onClick={() => onChangAscending(true)}
+          >
+            <Icon
+              path={mdiSortAscending}
+              size={1}
+            />
+          </button>
+        )}
       </div>
       <div className="button-components">
-        <div className="add-case-button-container">
+        <div className="add-user-button-container">
           <button
-            className="add-case-button"
+            className="add-user-button"
             onClick={() => setIsAddingUser(true)}
           >
             <Icon
@@ -267,6 +305,120 @@ function UsersTableToolbar({
           onCloseSignal={() => setAddingUserError(null)}
         />
       )}
+    </div>
+  );
+}
+
+interface PaginationNavbarPropType {
+  totalPaginationCount: number;
+  paginationIndex: number;
+  onChangePaginationIndex: React.Dispatch<React.SetStateAction<number>>;
+}
+
+function PaginationNavbar({
+  totalPaginationCount,
+  paginationIndex,
+  onChangePaginationIndex
+}: PaginationNavbarPropType) {
+  const { t } = useTranslation();
+  const [paginationInput, setPaginationInput] = useState<string>(String(paginationIndex));
+
+  return (
+    <div className="pagination-navbar">
+      <div className="direction-buttons-container">
+        <span className="first-page-container">
+          <button 
+            className="first-page-button"
+            onClick={() => onChangePaginationIndex(1)}
+          >
+            <Icon
+              path={mdiPageFirst}
+              size={1}
+            />
+          </button>
+        </span>
+        <span className="prev-page-container">
+          <button 
+            className="prev-page-button"
+            onClick={() => onChangePaginationIndex(
+              paginationIndex <= 1
+                ? 1
+                : paginationIndex - 1
+            )}
+          >
+            <Icon
+              path={mdiChevronLeft}
+              size={1}
+            />
+          </button>
+        </span>
+        <span className="pagination-info">
+          <p>
+            {paginationIndex + "/" + totalPaginationCount}
+          </p>
+        </span>
+        <span className="next-page-container">
+          <button 
+            className="next-page-button"
+            onClick={() => onChangePaginationIndex(
+              paginationIndex >= totalPaginationCount
+                ? totalPaginationCount
+                : paginationIndex + 1
+            )}
+          >
+            <Icon
+              path={mdiChevronRight}
+              size={1}
+            />
+          </button>
+        </span>
+        <span className="last-page-container">
+          <button 
+            className="last-page-button"
+            onClick={() => onChangePaginationIndex(totalPaginationCount)}
+          >
+            <Icon
+              path={mdiPageLast}
+              size={1}
+            />
+          </button>
+        </span>
+      </div>
+      <span className="jump-to-page-container">
+        <form 
+          className="jump-to-page-form"
+          onSubmit={(e) => e.preventDefault()}
+        >
+          <TextFieldInput
+            inputName="jump-to-page-input"
+            placeholder=""
+            textInputValue={paginationInput}
+            onTextInputChange={(e) => setPaginationInput(e.target.value)}
+          />
+          <button 
+            className="confirm-jump-button"
+            onClick={() => {
+              let parse = Number(paginationInput);
+              if (!Number.isNaN(parse)) {
+                onChangePaginationIndex(
+                  parse <= 0
+                    ? 1
+                    : parse > totalPaginationCount
+                      ? totalPaginationCount
+                      : parse
+                );
+              } else {
+                onChangePaginationIndex(paginationIndex);
+              }
+            }}
+          >
+            <Icon
+              path={mdiCheck}
+              size={1}
+            />
+          </button>
+        </form>
+      </span>
     </div>
   );
 }
@@ -315,9 +467,12 @@ interface UsersTableContainerPropType {
   usersList: UserInfo[];
   isAscending: boolean;
   userQueryContent: string;
+  paginationIdex: number;
+  totalPaginationCount: number;
   checkUsernameRepeated: (username: string) => boolean;
   onChangAscending: React.Dispatch<React.SetStateAction<boolean>>;
   onChangeUserQueryContent: React.Dispatch<React.SetStateAction<string>>;
+  onChangePaginationIndex: React.Dispatch<React.SetStateAction<number>>;
   onRefreshUsers: () => void;
   onAddUser: (
     addUsername: string,
@@ -336,9 +491,12 @@ function UsersTableContainer({
   usersList,
   isAscending,
   userQueryContent,
+  paginationIdex,
+  totalPaginationCount,
   checkUsernameRepeated,
   onChangAscending,
   onChangeUserQueryContent,
+  onChangePaginationIndex,
   onRefreshUsers,
   onAddUser,
   onResetPassword,
@@ -360,6 +518,11 @@ function UsersTableContainer({
         usersList={usersList} 
         onResetPassword={onResetPassword}
         onDeleteUser={onDeleteUser}
+      />
+      <PaginationNavbar
+        paginationIndex={paginationIdex}
+        totalPaginationCount={totalPaginationCount}
+        onChangePaginationIndex={onChangePaginationIndex}
       />
     </div>
   )
@@ -403,7 +566,7 @@ function AdminConsolePage({
 
   const [usersList,                         setUsersList] = useState<UserInfo[]>([]);
   const [filteredUsersList,         setFilteredUsersList] = useState<UserInfo[]>([]);
-  const [userClickedField,           setUserClickedField] = useState<keyof UserInfo>("username");
+  const [userClickedField,           setUserClickedField] = useState<keyof UserInfo>("userID");
   const [isAscending,                     setIsAscending] = useState<boolean>(true);
   const [userQueryContent,           setUserQueryContent] = useState<string>("");
   const [paginationIndex,             setPaginationIndex] = useState<number>(1);
@@ -442,7 +605,7 @@ function AdminConsolePage({
       = usersList.filter((originalUser) => {
         if (
           userClickedField === "userID" &&
-          originalUser[userClickedField] === parseInt(userQueryContent)
+          String(originalUser[userClickedField]).indexOf(userQueryContent) !== -1
         ) {
           return true;
         } else if (
@@ -576,9 +739,12 @@ function AdminConsolePage({
           usersList={filteredUsersList}
           isAscending={isAscending}
           userQueryContent={userQueryContent}
+          paginationIdex={paginationIndex}
+          totalPaginationCount={totalPaginationCount}
           checkUsernameRepeated={checkUsernameRepeated}
           onChangAscending={setIsAscending}
           onChangeUserQueryContent={setUserQueryContent}
+          onChangePaginationIndex={setPaginationIndex}
           onRefreshUsers={handleRefreshUsers}
           onAddUser={handleAddUser}
           onResetPassword={handleResetPassword}

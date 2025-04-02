@@ -5,7 +5,8 @@ import { useNavigate } from "react-router-dom";
 
 import { 
   mdiTranslate,
-  mdiShieldAccount
+  mdiShieldAccount,
+  mdiAccountChildCircle
 } from "@mdi/js"
 
 import "./TopBar.css"
@@ -32,10 +33,6 @@ function TopBar({
     }
   };
 
-  function handleNavigateAdminConsole() {
-    navigate("/admin");
-  }
-
   return (
     <div className="top-bar">
       <div className="message-component">
@@ -53,15 +50,27 @@ function TopBar({
             />
           </button>
         </div>
-        {(isAdmin) && (
+        {(isAdmin) ? (
           <div className="admin-console-button-container">
             <button
               className="admin-console-button top-bar-button"
-              onClick={handleNavigateAdminConsole}
+              onClick={() => navigate("/admin")}
               disabled={isDisabled}
             >
               <Icon
                 path={mdiShieldAccount}
+                size={1}
+              />
+            </button>
+          </div>
+        ) : (
+          <div className="user-profile-button-container">
+            <button 
+              className="user-profile-button top-bar-button"
+              onClick={() => navigate("/profile")}
+            >
+              <Icon
+                path={mdiAccountChildCircle}
                 size={1}
               />
             </button>
