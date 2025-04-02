@@ -58,17 +58,27 @@ const languageResources = {
       // Admin Console Page Translation
 
       "adminConsolePageName": "Manage Accounts",
+
       "userID": "User ID",
       "isAdmin": "Is Admin?",
       "userName": "Username",
       "phoneNumber": "Tel.",
+
       "addingUserModalTitle": "Add User",
       "addingUserUsernameInputPlaceholder": "Username*",
       "addingUserPasswordInputPlaceholder": "Password*",
       "addingUserConfirmInputPlaceholder": "Confirm Your Password*",
       "addingUserUsernameRepeatedError": "Repeated username",
       "addingUserConfirmPasswordError": "The confirm password is not same with user password",
-      "addingUserEmptyInputError": "Username, Password or Confirm Password field are empty"
+      "addingUserEmptyInputError": "Username, Password or Confirm Password field are empty",
+
+      "resettingPasswordModalTitle": "Reset Password",
+      "resettingPasswordInputPlaceholder": "The Reset Password*",
+      "resettingPasswordConfirmInputPlaceholder": "Confirm Your Password*",
+      "resettingPasswordConfirmError": "The confirm password is not same with reset password",
+
+      "deletingUserModalTitle": "Delete User",
+      "deletingUserModalMessage": "Are you sure to delete this user?"
     }
   },
   zh: {
@@ -124,6 +134,7 @@ const languageResources = {
       // Admin Console Page Translation
 
       "adminConsolePageName": "账户管理",
+
       "addingUserModalTitle": "增加账号",
       "userID": "用户编号",
       "isAdmin": "是否是管理员",
@@ -131,7 +142,18 @@ const languageResources = {
       "phoneNumber": "联系电话",
       "addingUserUsernameInputPlaceholder": "用户名（必填）",
       "addingUserPasswordInputPlaceholder": "密码（必填）",
-      "addingUserConfirmInputPlaceholder": "确认密码（必填）"
+      "addingUserConfirmInputPlaceholder": "确认密码（必填）",
+
+      "resettingPasswordModalTitle": "重置密码",
+      "resettingPasswordInputPlaceholder": "您重置后的密码（必填）",
+      "resettingPasswordConfirmInputPlaceholder": "确认密码（必填）",
+      "addingUserUsernameRepeatedError": "用户名重复",
+      "addingUserConfirmPasswordError": "确认密码与密码不一致",
+      "addingUserEmptyInputError": "用户名、密码或确认密码为空",
+      "resettingPasswordConfirmError": "确认密码与重置的密码不一致",
+
+      "deletingUserModalTitle": "删除用户",
+      "deletingUserModalMessage": "你确定要删除这个用户吗？"
     }
   }
 };

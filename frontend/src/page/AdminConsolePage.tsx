@@ -43,9 +43,9 @@ import TopBar from "../components/TopBar.tsx";
 import TextFieldInput from "../components/TextFieldInput.tsx";
 import AbstractModal from "../components/AbstractModal.tsx";
 import AlertModal from "../components/AlertModal.tsx";
+import ConfirmModal from "../components/ConfirmModal.tsx";
 
 interface AddingUserModalPropType {
-  message: string;
   onAddUser: (
     addUsername: string,
     addPassword: string,
@@ -55,7 +55,6 @@ interface AddingUserModalPropType {
 }
 
 function AddingUserModal({
-  message,
   onAddUser,
   onCloseSignal
 }: AddingUserModalPropType) {
@@ -66,7 +65,7 @@ function AddingUserModal({
 
   return (
     <AbstractModal
-      message={message}
+      message={t("addingUserModalTitle")}
       onCloseSignal={onCloseSignal}
     >
       <div className="username-input-container">
@@ -118,6 +117,66 @@ function AddingUserModal({
   );
 }
 
+interface ResettingPasswordModalPropType {
+  onResetPassword: (
+    resetPassword: string,
+    confirmPassword: string
+  ) => void;
+  onCloseSignal: () => void;
+}
+
+function ResettingPasswordModal({
+  onResetPassword,
+  onCloseSignal
+}: ResettingPasswordModalPropType ) {
+  const { t } = useTranslation();
+  const [resetInput,     setResetInput] = useState<string>("");
+  const [confirmInput, setConfirmInput] = useState<string>("");
+
+  return (
+    <AbstractModal
+      message={t("resettingPasswordModalTitle")}
+      onCloseSignal={onCloseSignal}
+    >
+      <div className="reset-password-input-container">
+        <TextFieldInput
+          inputName="reset-password-input"
+          placeholder={t("resettingPasswordInputPlaceholder")}
+          textInputValue={resetInput}
+          onTextInputChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            setResetInput(e.target.value);
+          }}
+        />
+      </div>
+      <div className="confirm-password-input-container">
+        <TextFieldInput
+          inputName="confirm-password-input"
+          placeholder={t("resettingPasswordConfirmInputPlaceholder")}
+          textInputValue={confirmInput}
+          onTextInputChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            setConfirmInput(e.target.value);
+          }}
+        />
+      </div>
+      <div className="button-container">
+        <div className="cancel-button-container">
+          <button onClick={() => onCloseSignal()}>
+            {t("cancelButton")}
+          </button>
+        </div>
+        <div className="confirm-button-container">
+          <button onClick={() => {
+            onResetPassword(resetInput, confirmInput);
+            onCloseSignal();
+          }}>
+            {t("confirmButton")}
+          </button>
+        </div>
+      </div>
+    </AbstractModal>
+  );
+}
+
 interface UserRowPropType {
   user: UserInfo;
   onResetPassword: (
@@ -128,11 +187,31 @@ interface UserRowPropType {
   onDeleteUser: (deletedUserID: number) => void;
 }
 
+type ResettingPasswordError =
+  | "ConfirmPasswordError"
+  | null;
+
 /**
  * @description This is the row unit components in `UsersTable`, notice there
  * is no API to edit the `userID` or `username`. Only admin can add new user
  */
-function UserRow({ user }: UserRowPropType) {
+function UserRow({
+  user,
+  onResetPassword,
+  onDeleteUser
+}: UserRowPropType) {
+  const { t } = useTranslation();
+  const [isResettingPassword,       setIsResettingPassword] = useState<boolean>(false);
+  const [resettingPasswordError, setResettingPasswordError] = useState<ResettingPasswordError>(null);
+  const [isDeleting,                         setIsDeleting] = useState<boolean>(false);
+
+  function checkResetPassword(resetPassword: string, confirmPassword: string) {
+    if (resetPassword !== confirmPassword) {
+      setResettingPasswordError("ConfirmPasswordError");
+    }
+    onResetPassword(user.userID, resetPassword, confirmPassword);
+  }
+
   return (
     <tr key={user.userID}>
       <th scope="col" key={1}>{user.userID}</th>
@@ -144,6 +223,7 @@ function UserRow({ user }: UserRowPropType) {
           <div className="reset-password-button-container">
             <button 
               className="reset-password"
+              onClick={() => setIsResettingPassword(true)}
             >
               <Icon
                 path={mdiLockReset}
@@ -154,6 +234,7 @@ function UserRow({ user }: UserRowPropType) {
           <div className="delete-button-container">
             <button 
               className="delete-user"
+              onClick={() => setIsDeleting(true)}
             >
               <Icon
                 path={mdiTrashCanOutline}
@@ -162,6 +243,34 @@ function UserRow({ user }: UserRowPropType) {
             </button>
           </div>
         </div>
+        {(isResettingPassword) && (
+          <ResettingPasswordModal
+            onResetPassword={checkResetPassword}
+            onCloseSignal={() => setIsResettingPassword(false)}
+          />
+        )}
+        {(resettingPasswordError) && (
+          <AlertModal
+            message={
+              "[" + getCurrentTime() + "]: "
+                +  (resettingPasswordError === "ConfirmPasswordError"
+                ? t("resettingPasswordConfirmError")
+                : t("resettingPasswordUnknownError"))
+            }
+            onCloseSignal={() => setResettingPasswordError(null)}
+          />
+        )}
+        {(isDeleting) && (
+          <ConfirmModal
+            title={t("deletingUserModalTitle")}
+            message={t("deletingUserModalMessage") + " " + user.username}
+            onCancel={() => setIsDeleting(false)}
+            onConfirm={() => {
+              onDeleteUser(user.userID)
+              setIsDeleting(false);
+            }}
+          />
+        )}
       </th>
     </tr>
   );
@@ -285,7 +394,6 @@ function UsersTableToolbar({
       </div>
       {isAddingUser && (
         <AddingUserModal
-          message={t("addingUserModalTitle")}
           onAddUser={checkAddUser}
           onCloseSignal={() => setIsAddingUser(false)}
         />
@@ -537,6 +645,7 @@ type AdminConsolePageError =
   | "RefreshTokenOutdatedError"
   | "AdminGetUsersListError"
   | "AddUserUnknownError"
+  | "DeleteUserUnknownError"
   | null;
 
 function AdminConsolePage({
@@ -665,45 +774,6 @@ function AdminConsolePage({
   }, [usersList, isAscending, userClickedField, userQueryContent, paginationIndex]);
 
   function handleRefreshUsers() {
-
-  }
-
-  function handleAddUser(
-    addUsername: string,
-    addPassword: string, 
-    confirmPassword: string
-  ) {
-    workingAPI.current
-      .post("/manager/admin/users", {
-        username: addUsername,
-        password: addPassword,
-        confirm_password: confirmPassword
-      })
-      .catch((error: ErrorResponse) => {
-        if (error.response.status === 401) {
-          handleRefreshToken();
-        } else {
-          setAdminConsolePageError("AddUserUnknownError");
-        }
-      });
-    
-    // Notice that the userID is determined by the backend, so we need to refresh the
-    // usersList
-  }
-
-  function handleResetPassword(
-    userID: number,
-    newPassword: string,
-    confirmPassword: string
-  ) {
-
-  }
-  
-  function handleDeleteUser(userID: number) {
-
-  }
-
-  useEffect(() => {
     workingAPI.current
       .get("/manager/admin/users")
       .then((response: AxiosResponse<AdminGetUserListResponseData, any>) => {
@@ -725,7 +795,61 @@ function AdminConsolePage({
           setAdminConsolePageError("AdminGetUsersListError");
         }
       });
-  }, []);
+  }
+
+  function handleAddUser(
+    addUsername: string,
+    addPassword: string, 
+    confirmPassword: string
+  ) {
+    workingAPI.current
+      .post("/manager/admin/users", {
+        username: addUsername,
+        password: addPassword,
+        confirm_password: confirmPassword
+      })
+      .catch((error: ErrorResponse) => {
+        if (error.response.status === 401) {
+          handleRefreshToken();
+        } else {
+          setAdminConsolePageError("AddUserUnknownError");
+        }
+      });
+
+    // So where is added user's phone number? The backend API doesn't support
+    // adding users's phone number, but the UserInfo indeed has!
+    
+    // Notice that the userID is determined by the backend, so we need to refresh the
+    // usersList
+    
+    handleRefreshUsers();
+  }
+
+  function handleResetPassword(
+    userID: number,
+    newPassword: string,
+    confirmPassword: string
+  ) {
+
+  }
+  
+  function handleDeleteUser(userID: number) {
+    workingAPI.current
+      .delete("/manager/admin/user/" + userID)
+      .catch((error: ErrorResponse) => {
+        if (error.response.status === 401) {
+          handleRefreshToken();
+        } else {
+          setAdminConsolePageError("DeleteUserUnknownError");
+        }
+      });
+    
+    // 😠 The document is wrong... We should use delete method rather than post
+
+    handleRefreshUsers();
+  }
+
+  useEffect(() => handleRefreshUsers(), []);
 
   return (
     <div className="admin-console-page">

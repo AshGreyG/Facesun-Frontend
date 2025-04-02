@@ -969,8 +969,8 @@ function WorkingPage({
     let newCasesData: CaseInfo[] = [];
     for (let i: number = 0; i < casesData.length; ++i) {
       if (
-         (isAscending && casesData[i][userClickedField] > addedCase[userClickedField]) ||
-        !(isAscending && casesData[i][userClickedField] < addedCase[userClickedField])
+          (isAscending && casesData[i][userClickedField] > addedCase[userClickedField]) ||
+         (!isAscending && casesData[i][userClickedField] < addedCase[userClickedField])
       ) { 
         newCasesData.push(...casesData.slice(0, i));
         newCasesData.push(addedCase);
